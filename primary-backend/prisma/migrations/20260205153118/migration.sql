@@ -1,0 +1,2 @@
+-- This migration was already applied to the database
+-- Marked as applied via prisma migrate resolve
