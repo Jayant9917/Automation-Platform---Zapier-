@@ -1,6 +1,12 @@
 import React, { createRef } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { Button, PrimaryButton, SecondaryButton, GhostButton, DangerButton } from "../components/ui/Button";
+import {
+  Button,
+  PrimaryButton,
+  SecondaryButton,
+  GhostButton,
+  DangerButton,
+} from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 
 test("button responds to a click and defaults to a non-submit type", () => {
@@ -13,14 +19,21 @@ test("button responds to a click and defaults to a non-submit type", () => {
 });
 test("disabled button does not invoke its handler", () => {
   const onClick = jest.fn();
-  render(<Button disabled onClick={onClick}>Run</Button>);
+  render(
+    <Button disabled onClick={onClick}>
+      Run
+    </Button>,
+  );
   fireEvent.click(screen.getByRole("button"));
   expect(onClick).not.toHaveBeenCalled();
 });
-test.each([PrimaryButton, SecondaryButton, GhostButton, DangerButton])("button wrapper preserves disabled behavior", Component => {
-  render(<Component disabled>Unavailable</Component>);
-  expect(screen.getByRole("button")).toBeDisabled();
-});
+test.each([PrimaryButton, SecondaryButton, GhostButton, DangerButton])(
+  "button wrapper preserves disabled behavior",
+  (Component) => {
+    render(<Component disabled>Unavailable</Component>);
+    expect(screen.getByRole("button")).toBeDisabled();
+  },
+);
 test("primary button accepts an explicit submit type", () => {
   render(<PrimaryButton type="submit">Save</PrimaryButton>);
   expect(screen.getByRole("button")).toHaveAttribute("type", "submit");

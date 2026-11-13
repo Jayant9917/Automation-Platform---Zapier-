@@ -36,13 +36,13 @@ const config: Config = {
       },
       fontSize: {
         "display-lg": ["2.5rem", { lineHeight: "1.2", fontWeight: "600" }],
-        "display": ["2rem", { lineHeight: "1.25", fontWeight: "600" }],
+        display: ["2rem", { lineHeight: "1.25", fontWeight: "600" }],
         "display-sm": ["1.5rem", { lineHeight: "1.3", fontWeight: "600" }],
-        "title": ["1.25rem", { lineHeight: "1.4", fontWeight: "600" }],
+        title: ["1.25rem", { lineHeight: "1.4", fontWeight: "600" }],
         "title-sm": ["1.125rem", { lineHeight: "1.4", fontWeight: "600" }],
-        "body": ["0.9375rem", { lineHeight: "1.5" }],
+        body: ["0.9375rem", { lineHeight: "1.5" }],
         "body-sm": ["0.8125rem", { lineHeight: "1.5" }],
-        "caption": ["0.75rem", { lineHeight: "1.4" }],
+        caption: ["0.75rem", { lineHeight: "1.4" }],
       },
       spacing: {
         "18": "4.5rem",
@@ -55,22 +55,22 @@ const config: Config = {
         "4xl": "1rem",
       },
       boxShadow: {
-        "soft": "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
+        soft: "0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
         "soft-md": "0 4px 6px -1px rgb(0 0 0 / 0.04), 0 2px 4px -2px rgb(0 0 0 / 0.04)",
         "soft-lg": "0 10px 15px -3px rgb(0 0 0 / 0.04), 0 4px 6px -4px rgb(0 0 0 / 0.04)",
-        "border": "0 0 0 1px rgb(0 0 0 / 0.06)",
+        border: "0 0 0 1px rgb(0 0 0 / 0.06)",
       },
       transitionDuration: {
-        "fast": "150ms",
-        "normal": "200ms",
+        fast: "150ms",
+        normal: "200ms",
       },
       maxWidth: {
-        "content": "42rem",
+        content: "42rem",
         "content-lg": "56rem",
         "content-xl": "72rem",
       },
       animation: {
-        "float": "float 6s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
         "fade-in-up": "fade-in-up 0.6s ease-out forwards",
       },
       keyframes: {

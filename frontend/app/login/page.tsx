@@ -41,8 +41,7 @@ export default function LoginPage() {
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { message?: string } } }).response
-              ?.data?.message
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : null;
       setError(message || "Login failed. Please try again.");
       setLoading(false);
@@ -73,10 +72,7 @@ export default function LoginPage() {
             <h2 className="text-title text-neutral-900">Log in</h2>
             <p className="mt-1 text-body-sm text-neutral-500">
               Don’t have an account?{" "}
-              <Link
-                href="/signup"
-                className="font-medium text-brand-600 hover:text-brand-700"
-              >
+              <Link href="/signup" className="font-medium text-brand-600 hover:text-brand-700">
                 Sign up
               </Link>
             </p>

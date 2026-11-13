@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -67,7 +69,7 @@ export default function CreateAutomationPage() {
             if (token?.trim()) return { Authorization: `Bearer ${token}` };
             return {};
           })(),
-        }
+        },
       );
       router.push("/dashboard");
     } catch (err: unknown) {
@@ -89,14 +91,11 @@ export default function CreateAutomationPage() {
 
   const isTriggerModal = modalOpen === "trigger";
   const modalIndex = typeof modalOpen === "number" ? modalOpen : null;
-  const availableItems = isTriggerModal
-    ? availableTriggers
-    : modalIndex !== null
-      ? availableActions
-      : [];
   const modalTitle = isTriggerModal ? "Select trigger" : "Select action";
 
-  const handleSelect = (item: { id: string; name: string; metadata?: Record<string, unknown> } | null) => {
+  const handleSelect = (
+    item: { id: string; name: string; metadata?: Record<string, unknown> } | null,
+  ) => {
     if (item === null) {
       closeModal();
       return;
@@ -153,7 +152,7 @@ export default function CreateAutomationPage() {
               type="trigger"
               onClick={() => openModal("trigger")}
             />
-            {selectedActions.map((action, i) => (
+            {selectedActions.map((action) => (
               <div key={action.index} className="flex flex-col items-center gap-0">
                 <WorkflowConnector />
                 <WorkflowNode
@@ -172,19 +171,19 @@ export default function CreateAutomationPage() {
               aria-label="Add step"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
             </button>
           </div>
         </div>
       </div>
 
-      <Modal
-        isOpen={modalOpen !== null}
-        onClose={closeModal}
-        title={modalTitle}
-        size="lg"
-      >
+      <Modal isOpen={modalOpen !== null} onClose={closeModal} title={modalTitle} size="lg">
         <TriggerActionModalContent
           items={isTriggerModal ? availableTriggers : availableActions}
           isTrigger={isTriggerModal}
@@ -254,7 +253,10 @@ function TriggerActionModalContent({
           }}
           className="flex w-full items-center gap-4 rounded-xl border border-neutral-200 p-4 text-left transition-colors duration-fast hover:border-neutral-300 hover:bg-neutral-50"
         >
-          <img
+          <Image
+            width={40}
+            height={40}
+            unoptimized
             src={image}
             alt=""
             className="h-10 w-10 rounded-xl border border-neutral-200 object-cover"
@@ -290,11 +292,7 @@ function EmailSelector({
         value={body}
         onChange={(e) => setBody(e.target.value)}
       />
-      <Button
-        variant="primary"
-        size="md"
-        onClick={() => setMetadata({ email, body })}
-      >
+      <Button variant="primary" size="md" onClick={() => setMetadata({ email, body })}>
         Submit
       </Button>
     </div>
@@ -325,11 +323,7 @@ function SolanaSelector({
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-      <Button
-        variant="primary"
-        size="md"
-        onClick={() => setMetadata({ amount, address })}
-      >
+      <Button variant="primary" size="md" onClick={() => setMetadata({ amount, address })}>
         Submit
       </Button>
     </div>

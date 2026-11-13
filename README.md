@@ -158,6 +158,7 @@ npx prisma migrate deploy
 Start each service in a separate terminal:
 
 **Terminal 1 - Primary Backend:**
+
 ```bash
 cd primary-backend
 npm run build
@@ -166,6 +167,7 @@ npm start
 ```
 
 **Terminal 2 - Hooks Service:**
+
 ```bash
 cd hooks
 npm run build
@@ -174,6 +176,7 @@ npm start
 ```
 
 **Terminal 3 - Processor:**
+
 ```bash
 cd processor
 npm run dev
@@ -181,6 +184,7 @@ npm run dev
 ```
 
 **Terminal 4 - Worker:**
+
 ```bash
 cd worker
 npm run build
@@ -189,6 +193,7 @@ npm start
 ```
 
 **Terminal 5 - Frontend:**
+
 ```bash
 cd frontend
 npm run dev
@@ -199,44 +204,49 @@ npm run dev
 
 ### Required Variables
 
-| Variable | Description | Service |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | primary-backend, processor, hooks |
-| `JWT_PASSWORD` | Secret key for JWT token signing | primary-backend |
-| `SMTP_ENDPOINT` | SMTP server hostname | worker |
-| `SMTP_USERNAME` | SMTP authentication username | worker |
-| `SMTP_PASSWORD` | SMTP authentication password | worker |
-| `SOL_PRIVATE_KEY` | Base58 encoded Solana private key | worker |
+| Variable          | Description                       | Service                           |
+| ----------------- | --------------------------------- | --------------------------------- |
+| `DATABASE_URL`    | PostgreSQL connection string      | primary-backend, processor, hooks |
+| `JWT_PASSWORD`    | Secret key for JWT token signing  | primary-backend                   |
+| `SMTP_ENDPOINT`   | SMTP server hostname              | worker                            |
+| `SMTP_USERNAME`   | SMTP authentication username      | worker                            |
+| `SMTP_PASSWORD`   | SMTP authentication password      | worker                            |
+| `SOL_PRIVATE_KEY` | Base58 encoded Solana private key | worker                            |
 
 ### Optional Variables
 
-| Variable | Description | Service |
-|----------|-------------|---------|
+| Variable                         | Description               | Service   |
+| -------------------------------- | ------------------------- | --------- |
 | `KAFKAJS_NO_PARTITIONER_WARNING` | Suppress KafkaJS warnings | processor |
-| `BACKEND_URL` | Backend API URL | frontend |
-| `HOOKS_URL` | Hooks service URL | frontend |
+| `BACKEND_URL`                    | Backend API URL           | frontend  |
+| `HOOKS_URL`                      | Hooks service URL         | frontend  |
 
 See `.env.example` for a complete template with descriptions.
 
 ## 🔧 API Endpoints
 
 ### Authentication
+
 - `POST /api/v1/user/signup` - Create a new user account
 - `POST /api/v1/user/signin` - Sign in and get JWT token
 - `GET /api/v1/user/user` - Get current user info (requires auth)
 
 ### Zaps
+
 - `POST /api/v1/zap` - Create a new Zap
 - `GET /api/v1/zap` - Get all Zaps for authenticated user
 - `GET /api/v1/zap/:zapId` - Get a specific Zap
 
 ### Triggers
+
 - `GET /api/v1/trigger` - Get available triggers
 
 ### Actions
+
 - `GET /api/v1/action` - Get available actions
 
 ### Webhooks
+
 - `POST /hooks/catch/:userId/:zapId` - Receive webhook events
 
 ## 🏛️ Architecture

@@ -31,8 +31,7 @@ export default function SignupPage() {
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { message?: string } } }).response
-              ?.data?.message
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : null;
       setError(message || "Sign up failed. Please try again.");
       setLoading(false);
@@ -63,10 +62,7 @@ export default function SignupPage() {
             <h2 className="text-title text-neutral-900">Create your account</h2>
             <p className="mt-1 text-body-sm text-neutral-500">
               Already have an account?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-brand-600 hover:text-brand-700"
-              >
+              <Link href="/login" className="font-medium text-brand-600 hover:text-brand-700">
                 Log in
               </Link>
             </p>

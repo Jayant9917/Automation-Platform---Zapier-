@@ -5,7 +5,7 @@ beforeEach(() => {
     zapRun: { create: jest.fn().mockResolvedValue({ id: "unit-run" }) },
     zapRunOutbox: { create: jest.fn().mockResolvedValue({ id: "unit-outbox" }) },
   };
-  database = { $transaction: jest.fn(callback => callback(tx)) };
+  database = { $transaction: jest.fn((callback) => callback(tx)) };
   req = { params: { userId: "2", zapId: "unit-zap" }, body: { message: "Unit input" } };
   res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
   jest.spyOn(console, "error").mockImplementation(() => {});
@@ -13,9 +13,13 @@ beforeEach(() => {
 test("creates the run and its outbox through the same transaction callback", async () => {
   await createWebhookHandler(database)(req, res);
   expect(database.$transaction).toHaveBeenCalledTimes(1);
-  expect(tx.zapRun.create).toHaveBeenCalledWith({ data: { zapId: "unit-zap", metadata: req.body } });
+  expect(tx.zapRun.create).toHaveBeenCalledWith({
+    data: { zapId: "unit-zap", metadata: req.body },
+  });
   expect(tx.zapRunOutbox.create).toHaveBeenCalledWith({ data: { zapRunId: "unit-run" } });
-  expect(tx.zapRun.create.mock.invocationCallOrder[0]).toBeLessThan(tx.zapRunOutbox.create.mock.invocationCallOrder[0]);
+  expect(tx.zapRun.create.mock.invocationCallOrder[0]).toBeLessThan(
+    tx.zapRunOutbox.create.mock.invocationCallOrder[0],
+  );
   expect(res.status).toHaveBeenCalledWith(200);
   expect(res.json).toHaveBeenCalledWith({ success: true });
 });
@@ -34,7 +38,12 @@ test("returns failure when the transaction rejects an outbox write", async () =>
 });
 test("does not respond success before the transaction resolves", async () => {
   let commit;
-  database.$transaction.mockImplementation(() => new Promise(resolve => { commit = resolve; }));
+  database.$transaction.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        commit = resolve;
+      }),
+  );
   const pending = createWebhookHandler(database)(req, res);
   expect(res.json).not.toHaveBeenCalled();
   commit();

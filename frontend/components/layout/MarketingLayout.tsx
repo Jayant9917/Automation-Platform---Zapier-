@@ -7,11 +7,7 @@ import axios from "axios";
 import { BACKEND_URL } from "@/app/config";
 import { Button } from "@/components/ui/Button";
 
-export function MarketingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function MarketingLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<{ name: string | null; email: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -44,7 +40,9 @@ export function MarketingLayout({
     <div className="min-h-screen bg-white">
       <header
         className={`sticky top-0 z-50 border-b transition-all duration-200 ${
-          scrolled ? "border-neutral-200 bg-white/90 shadow-soft backdrop-blur-md" : "border-transparent bg-transparent"
+          scrolled
+            ? "border-neutral-200 bg-white/90 shadow-soft backdrop-blur-md"
+            : "border-transparent bg-transparent"
         }`}
       >
         <div className="container-content flex h-16 items-center justify-between">
@@ -58,11 +56,7 @@ export function MarketingLayout({
             {authChecked &&
               (user ? (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push("/dashboard")}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard")}>
                     Dashboard
                   </Button>
                   <Button
@@ -79,18 +73,10 @@ export function MarketingLayout({
                 </>
               ) : (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push("/login")}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => router.push("/login")}>
                     Log in
                   </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => router.push("/signup")}
-                  >
+                  <Button variant="primary" size="sm" onClick={() => router.push("/signup")}>
                     Sign up
                   </Button>
                 </>

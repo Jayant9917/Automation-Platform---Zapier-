@@ -15,10 +15,7 @@ export default function BillingPage() {
 
       <div className="grid gap-8 md:grid-cols-2 max-w-4xl">
         <Card padding="lg">
-          <CardHeader
-            title="Current plan"
-            subtitle="Free forever for core features"
-          />
+          <CardHeader title="Current plan" subtitle="Free forever for core features" />
           <div className="rounded-xl bg-neutral-50 p-4">
             <p className="text-title-sm text-neutral-900">Free</p>
             <p className="mt-1 text-body-sm text-neutral-500">
@@ -31,10 +28,7 @@ export default function BillingPage() {
         </Card>
 
         <Card padding="lg">
-          <CardHeader
-            title="Payment method"
-            subtitle="No payment method on file"
-          />
+          <CardHeader title="Payment method" subtitle="No payment method on file" />
           <p className="text-body-sm text-neutral-500">
             Add a payment method to upgrade or pay for usage.
           </p>

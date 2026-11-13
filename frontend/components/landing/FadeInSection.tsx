@@ -18,7 +18,7 @@ export function FadeInSection({ children, className = "" }: FadeInSectionProps) 
       ([entry]) => {
         if (entry.isIntersecting) setVisible(true);
       },
-      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -28,9 +28,7 @@ export function FadeInSection({ children, className = "" }: FadeInSectionProps) 
     <div
       ref={ref}
       className={`transition-all duration-700 ease-out ${
-        visible
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-8"
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       } ${className}`}
     >
       {children}

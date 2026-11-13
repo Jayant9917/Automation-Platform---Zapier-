@@ -16,12 +16,9 @@ const variantStyles = {
     "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-soft hover:shadow-soft-md",
   secondary:
     "bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300 active:bg-neutral-100",
-  ghost:
-    "text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200",
-  danger:
-    "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
-  ghostDanger:
-    "text-red-600 hover:bg-red-50 active:bg-red-100",
+  ghost: "text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200",
+  danger: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
+  ghostDanger: "text-red-600 hover:bg-red-50 active:bg-red-100",
 };
 
 type Variant = keyof typeof variantStyles;
@@ -122,13 +119,7 @@ export function GhostButton({
   disabled?: boolean;
 }) {
   return (
-    <Button
-      variant="ghost"
-      size={size}
-      onClick={onClick}
-      className={className}
-      disabled={disabled}
-    >
+    <Button variant="ghost" size={size} onClick={onClick} className={className} disabled={disabled}>
       {children}
     </Button>
   );

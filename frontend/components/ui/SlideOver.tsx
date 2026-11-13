@@ -9,12 +9,7 @@ interface SlideOverProps {
   children: ReactNode;
 }
 
-export function SlideOver({
-  isOpen,
-  onClose,
-  title,
-  children,
-}: SlideOverProps) {
+export function SlideOver({ isOpen, onClose, title, children }: SlideOverProps) {
   useEffect(() => {
     if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
@@ -56,7 +51,13 @@ export function SlideOver({
             className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors duration-fast"
             aria-label="Close"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

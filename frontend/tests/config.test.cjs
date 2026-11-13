@@ -1,6 +1,11 @@
 const originalEnv = process.env;
-beforeEach(() => { jest.resetModules(); process.env = { ...originalEnv }; });
-afterEach(() => { process.env = originalEnv; });
+beforeEach(() => {
+  jest.resetModules();
+  process.env = { ...originalEnv };
+});
+afterEach(() => {
+  process.env = originalEnv;
+});
 test("defaults to same-origin Docker gateway URLs", () => {
   delete process.env.NEXT_PUBLIC_BACKEND_URL;
   delete process.env.NEXT_PUBLIC_HOOKS_URL;

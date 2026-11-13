@@ -3,8 +3,18 @@
 import { FadeInSection } from "./FadeInSection";
 
 const APPS = [
-  "Slack", "Gmail", "Notion", "Stripe", "Airtable", "GitHub",
-  "Google Sheets", "Discord", "Linear", "Figma", "HubSpot", "Salesforce",
+  "Slack",
+  "Gmail",
+  "Notion",
+  "Stripe",
+  "Airtable",
+  "GitHub",
+  "Google Sheets",
+  "Discord",
+  "Linear",
+  "Figma",
+  "HubSpot",
+  "Salesforce",
 ];
 
 export function IntegrationsSection() {

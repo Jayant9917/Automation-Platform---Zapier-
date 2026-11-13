@@ -1,10 +1,4 @@
-export const Feature = ({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle: string;
-}) => {
+export const Feature = ({ title, subtitle }: { title: string; subtitle: string }) => {
   return (
     <div className="flex items-center gap-3">
       <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
@@ -28,11 +22,7 @@ function CheckIcon() {
       stroke="currentColor"
       className="h-5 w-5"
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="m4.5 12.75 6 6 9-13.5"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
     </svg>
   );
 }

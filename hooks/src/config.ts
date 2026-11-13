@@ -21,7 +21,12 @@ function databaseUrl(): string {
   const value = required("DATABASE_URL");
   try {
     const url = new URL(value);
-    if (!["postgres:", "postgresql:"].includes(url.protocol) || !url.hostname || url.pathname.length < 2) throw new Error();
+    if (
+      !["postgres:", "postgresql:"].includes(url.protocol) ||
+      !url.hostname ||
+      url.pathname.length < 2
+    )
+      throw new Error();
   } catch {
     throw new Error("Invalid PostgreSQL URL: DATABASE_URL");
   }

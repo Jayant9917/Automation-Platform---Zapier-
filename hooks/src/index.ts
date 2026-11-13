@@ -20,5 +20,5 @@ app.get("/health", async (_req, res) => {
 app.post("/hooks/catch/:userId/:zapId", createWebhookHandler(prisma));
 
 app.listen(config.port, () => {
-    console.log(`Hooks server running on port ${config.port}`);
+  console.log(`Hooks server running on port ${config.port}`);
 });

@@ -17,10 +17,11 @@ function port(name: string, fallback: number): number {
   return value;
 }
 
-
 function brokers(): string[] {
-  const values = required("KAFKA_BROKERS").split(",").map(value => value.trim());
-  if (values.some(value => !value || !/^(\[[0-9a-fA-F:]+\]|[^\s:/,]+):\d+$/.test(value))) {
+  const values = required("KAFKA_BROKERS")
+    .split(",")
+    .map((value) => value.trim());
+  if (values.some((value) => !value || !/^(\[[0-9a-fA-F:]+\]|[^\s:/,]+):\d+$/.test(value))) {
     throw new Error("Invalid host:port list: KAFKA_BROKERS");
   }
   for (const value of values) {

@@ -5,11 +5,13 @@ import { FadeInSection } from "./FadeInSection";
 const PAINS = [
   {
     title: "Manual work that doesn’t scale",
-    description: "Copy-paste between tools, repeat the same tasks, and chase updates instead of building.",
+    description:
+      "Copy-paste between tools, repeat the same tasks, and chase updates instead of building.",
   },
   {
     title: "Integrations that break or never ship",
-    description: "Custom code and one-off scripts that are hard to maintain and impossible to hand off.",
+    description:
+      "Custom code and one-off scripts that are hard to maintain and impossible to hand off.",
   },
   {
     title: "Time lost on busywork",
@@ -22,11 +24,10 @@ export function ProblemSection() {
     <FadeInSection>
       <section className="section-padding bg-neutral-50/50">
         <div className="container-content text-center">
-          <h2 className="section-heading">
-            Your team is stuck in the middle
-          </h2>
+          <h2 className="section-heading">Your team is stuck in the middle</h2>
           <p className="section-subtext">
-            Between the apps you love and the work that actually moves the needle. Automation should simplify that—not add another layer of complexity.
+            Between the apps you love and the work that actually moves the needle. Automation should
+            simplify that—not add another layer of complexity.
           </p>
           <div className="mt-16 grid gap-6 md:grid-cols-3">
             {PAINS.map((item, i) => (

@@ -17,22 +17,22 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: [CMD-SHELL, 'pg_isready -U actionhub -d actionhub']
+      test: [CMD-SHELL, "pg_isready -U actionhub -d actionhub"]
       interval: 3s
       timeout: 3s
       retries: 30
 
   kafka-volume-init:
     image: apache/kafka:3.9.1
-    user: '0:0'
-    entrypoint: [sh, -c, 'chown 1000:1000 /kafka-data']
+    user: "0:0"
+    entrypoint: [sh, -c, "chown 1000:1000 /kafka-data"]
     volumes:
       - kafka-data:/kafka-data
 
   kafka:
     image: apache/kafka:3.9.1
     depends_on:
-      kafka-volume-init: {condition: service_completed_successfully}
+      kafka-volume-init: { condition: service_completed_successfully }
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -51,7 +51,11 @@ services:
     volumes:
       - kafka-data:/tmp/kraft-combined-logs
     healthcheck:
-      test: [CMD-SHELL, '/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list >/dev/null 2>&1']
+      test:
+        [
+          CMD-SHELL,
+          "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list >/dev/null 2>&1",
+        ]
       interval: 5s
       timeout: 10s
       retries: 30
@@ -60,30 +64,48 @@ services:
   kafka-init:
     image: apache/kafka:3.9.1
     depends_on:
-      kafka: {condition: service_healthy}
+      kafka: { condition: service_healthy }
     entrypoint: [/opt/kafka/bin/kafka-topics.sh]
-    command: [--bootstrap-server, 'kafka:9092', --create, --if-not-exists, --topic, zap-events, --partitions, '1', --replication-factor, '1']
+    command:
+      [
+        --bootstrap-server,
+        "kafka:9092",
+        --create,
+        --if-not-exists,
+        --topic,
+        zap-events,
+        --partitions,
+        "1",
+        --replication-factor,
+        "1",
+      ]
 
   db-init:
     image: actionhub-primary-backend-dev
     pull_policy: never
     environment: *database
     depends_on:
-      postgres: {condition: service_healthy}
-    command: [sh, -c, 'npx prisma migrate deploy --config prisma.config.ts && npx tsx seed.ts']
+      postgres: { condition: service_healthy }
+    command: [sh, -c, "npx prisma migrate deploy --config prisma.config.ts && npx tsx seed.ts"]
 
   primary-backend:
     image: actionhub-primary-backend-dev
-    build: {context: ./primary-backend, target: development}
+    build: { context: ./primary-backend, target: development }
     init: true
     environment:
       <<: *database
       PORT: 3000
       JWT_PASSWORD: ${JWT_PASSWORD:?Set JWT_PASSWORD in .env.docker}
     depends_on:
-      db-init: {condition: service_completed_successfully}
+      db-init: { condition: service_completed_successfully }
     healthcheck:
-      test: [CMD, node, -e, 'fetch("http://127.0.0.1:3000/health").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))']
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          'fetch("http://127.0.0.1:3000/health").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))',
+        ]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -102,6 +124,18 @@ services:
           path: ./primary-backend/jest.config.cjs
           target: /app/jest.config.cjs
           initial_sync: true
+        - action: sync
+          path: ./primary-backend/.eslintrc.json
+          target: /app/.eslintrc.json
+          initial_sync: true
+        - action: sync
+          path: ./primary-backend/.prettierrc.json
+          target: /app/.prettierrc.json
+          initial_sync: true
+        - action: sync
+          path: ./primary-backend/.prettierignore
+          target: /app/.prettierignore
+          initial_sync: true
         - action: rebuild
           path: ./primary-backend/package.json
         - action: rebuild
@@ -117,15 +151,21 @@ services:
 
   hooks:
     image: actionhub-hooks-dev
-    build: {context: ./hooks, target: development}
+    build: { context: ./hooks, target: development }
     init: true
     environment:
       <<: *database
       PORT: 3002
     depends_on:
-      db-init: {condition: service_completed_successfully}
+      db-init: { condition: service_completed_successfully }
     healthcheck:
-      test: [CMD, node, -e, 'fetch("http://127.0.0.1:3002/health").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))']
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          'fetch("http://127.0.0.1:3002/health").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))',
+        ]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -144,6 +184,18 @@ services:
           path: ./hooks/jest.config.cjs
           target: /app/jest.config.cjs
           initial_sync: true
+        - action: sync
+          path: ./hooks/.eslintrc.json
+          target: /app/.eslintrc.json
+          initial_sync: true
+        - action: sync
+          path: ./hooks/.prettierrc.json
+          target: /app/.prettierrc.json
+          initial_sync: true
+        - action: sync
+          path: ./hooks/.prettierignore
+          target: /app/.prettierignore
+          initial_sync: true
         - action: rebuild
           path: ./hooks/package.json
         - action: rebuild
@@ -159,13 +211,13 @@ services:
 
   processor:
     image: actionhub-processor-dev
-    build: {context: ./processor, target: development}
+    build: { context: ./processor, target: development }
     init: true
     environment:
       <<: [*database, *kafka-client]
     depends_on:
-      db-init: {condition: service_completed_successfully}
-      kafka-init: {condition: service_completed_successfully}
+      db-init: { condition: service_completed_successfully }
+      kafka-init: { condition: service_completed_successfully }
     develop:
       watch:
         - action: sync+restart
@@ -180,6 +232,18 @@ services:
         - action: sync
           path: ./processor/jest.config.cjs
           target: /app/jest.config.cjs
+          initial_sync: true
+        - action: sync
+          path: ./processor/.eslintrc.json
+          target: /app/.eslintrc.json
+          initial_sync: true
+        - action: sync
+          path: ./processor/.prettierrc.json
+          target: /app/.prettierrc.json
+          initial_sync: true
+        - action: sync
+          path: ./processor/.prettierignore
+          target: /app/.prettierignore
           initial_sync: true
         - action: rebuild
           path: ./processor/package.json
@@ -197,23 +261,23 @@ services:
   mailpit:
     image: axllent/mailpit:v1.27
     ports:
-      - '127.0.0.1:${MAIL_PORT:-8025}:8025'
+      - "127.0.0.1:${MAIL_PORT:-8025}:8025"
 
   worker:
     image: actionhub-worker-dev
-    build: {context: ./worker, target: development}
+    build: { context: ./worker, target: development }
     init: true
     environment:
       <<: *kafka-client
       KAFKA_GROUP_ID: main-worker
       SMTP_ENDPOINT: mailpit
       SMTP_PORT: 1025
-      SMTP_AUTH: 'false'
-      SMTP_REQUIRE_TLS: 'false'
+      SMTP_AUTH: "false"
+      SMTP_REQUIRE_TLS: "false"
       SMTP_FROM: workflows@actionhub.test
     depends_on:
-      kafka-init: {condition: service_completed_successfully}
-      mailpit: {condition: service_started}
+      kafka-init: { condition: service_completed_successfully }
+      mailpit: { condition: service_started }
     develop:
       watch:
         - action: sync+restart
@@ -228,6 +292,18 @@ services:
           path: ./worker/jest.config.cjs
           target: /app/jest.config.cjs
           initial_sync: true
+        - action: sync
+          path: ./worker/.eslintrc.json
+          target: /app/.eslintrc.json
+          initial_sync: true
+        - action: sync
+          path: ./worker/.prettierrc.json
+          target: /app/.prettierrc.json
+          initial_sync: true
+        - action: sync
+          path: ./worker/.prettierignore
+          target: /app/.prettierignore
+          initial_sync: true
         - action: rebuild
           path: ./worker/package.json
         - action: rebuild
@@ -239,14 +315,20 @@ services:
 
   frontend:
     image: actionhub-frontend-dev
-    build: {context: ./frontend, target: development}
+    build: { context: ./frontend, target: development }
     init: true
     environment:
-      NEXT_PUBLIC_BACKEND_URL: ''
-      NEXT_PUBLIC_HOOKS_URL: ''
-      WATCHPACK_POLLING: 'true'
+      NEXT_PUBLIC_BACKEND_URL: ""
+      NEXT_PUBLIC_HOOKS_URL: ""
+      WATCHPACK_POLLING: "true"
     healthcheck:
-      test: [CMD, node, -e, 'fetch("http://127.0.0.1:3001/").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))']
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          'fetch("http://127.0.0.1:3001/").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))',
+        ]
       interval: 10s
       timeout: 10s
       retries: 20
@@ -285,6 +367,18 @@ services:
           path: ./frontend/jest.config.cjs
           target: /app/jest.config.cjs
           initial_sync: true
+        - action: sync
+          path: ./frontend/.eslintrc.json
+          target: /app/.eslintrc.json
+          initial_sync: true
+        - action: sync
+          path: ./frontend/.prettierrc.json
+          target: /app/.prettierrc.json
+          initial_sync: true
+        - action: sync
+          path: ./frontend/.prettierignore
+          target: /app/.prettierignore
+          initial_sync: true
         - action: rebuild
           path: ./frontend/package.json
         - action: rebuild
@@ -297,13 +391,13 @@ services:
   proxy:
     image: nginx:1.28-alpine
     ports:
-      - '127.0.0.1:${WEB_PORT:-8080}:80'
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      frontend: {condition: service_healthy}
-      primary-backend: {condition: service_healthy}
-      hooks: {condition: service_healthy}
+      frontend: { condition: service_healthy }
+      primary-backend: { condition: service_healthy }
+      hooks: { condition: service_healthy }
 
 volumes:
   postgres-data:

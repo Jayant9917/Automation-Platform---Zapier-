@@ -7,11 +7,7 @@ import { BACKEND_URL } from "@/app/config";
 import { Sidebar } from "./Sidebar";
 import { TopNav } from "./TopNav";
 
-export function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<{ name: string | null; email: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -56,19 +52,14 @@ export function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-neutral-50">
-      <Sidebar
-        mobileOpen={sidebarMobileOpen}
-        onMobileOpenChange={setSidebarMobileOpen}
-      />
+      <Sidebar mobileOpen={sidebarMobileOpen} onMobileOpenChange={setSidebarMobileOpen} />
       <div className="flex flex-1 flex-col min-w-0">
         <TopNav
           user={user}
           onLogout={handleLogout}
           onMenuClick={() => setSidebarMobileOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

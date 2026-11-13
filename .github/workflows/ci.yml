@@ -1,4 +1,4 @@
-name: Unit tests and build
+name: Quality checks and unit tests
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   unit:
-    name: ${{ matrix.service }} unit tests
+    name: ${{ matrix.service }} quality checks
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
@@ -35,7 +35,19 @@ jobs:
           tags: actionhub-${{ matrix.service }}-ci:latest
           cache-from: type=gha,scope=unit-${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=unit-${{ matrix.service }}
+      - name: ESLint (network disabled)
+        run: docker run --rm --network none actionhub-${{ matrix.service }}-ci:latest npm run lint
+      - name: Prettier module check (network disabled)
+        run: docker run --rm --network none actionhub-${{ matrix.service }}-ci:latest npm run format:check
+      - name: Prettier repository check (frontend job only)
+        if: matrix.service == 'frontend'
+        run: >-
+          docker run --rm --network none
+          --mount type=bind,source="$PWD",target=/workspace,readonly
+          --workdir /workspace actionhub-frontend-ci:latest
+          /app/node_modules/.bin/prettier --check .
       - name: Jest unit tests and coverage (network disabled)
+        id: unit_tests
         run: docker run --network none --name unit-tests actionhub-${{ matrix.service }}-ci:latest npm run test:ci
       - name: TypeScript checks (network disabled)
         run: docker run --rm --network none actionhub-${{ matrix.service }}-ci:latest npm run typecheck
@@ -43,10 +55,10 @@ jobs:
         # Placeholder is used for Prisma code generation only. No database is started.
         run: docker run --rm -e DATABASE_URL=postgresql://build:build@unused:5432/build_only actionhub-${{ matrix.service }}-ci:latest npm run build
       - name: Extract coverage
-        if: always()
+        if: always() && steps.unit_tests.outcome != 'skipped'
         run: docker cp unit-tests:/app/coverage ./coverage
       - name: Upload coverage report
-        if: always()
+        if: always() && steps.unit_tests.outcome != 'skipped'
         uses: actions/upload-artifact@v4
         with:
           name: unit-coverage-${{ matrix.service }}

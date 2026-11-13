@@ -22,11 +22,12 @@ export default function WorkflowBuilderPage() {
           >
             ← Automations
           </Link>
-          <h1 className="mt-2 text-display-sm text-neutral-900">
-            Workflow
-          </h1>
+          <h1 className="mt-2 text-display-sm text-neutral-900">Workflow</h1>
           <p className="mt-1 text-body text-neutral-500">
-            ID: <code className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-body-sm">{id}</code>
+            ID:{" "}
+            <code className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-body-sm">
+              {id}
+            </code>
           </p>
         </div>
         <Button variant="secondary" size="md" onClick={() => router.push("/dashboard")}>
@@ -39,19 +40,9 @@ export default function WorkflowBuilderPage() {
           View and edit this workflow. Trigger and actions are shown below.
         </p>
         <div className="flex flex-col items-center gap-0 py-8">
-          <WorkflowNode
-            index={1}
-            label="Webhook"
-            type="trigger"
-            onClick={() => {}}
-          />
+          <WorkflowNode index={1} label="Webhook" type="trigger" onClick={() => {}} />
           <WorkflowConnector />
-          <WorkflowNode
-            index={2}
-            label="Action"
-            type="action"
-            onClick={() => {}}
-          />
+          <WorkflowNode index={2} label="Action" type="action" onClick={() => {}} />
         </div>
       </Card>
     </div>

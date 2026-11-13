@@ -9,7 +9,8 @@ const QUOTES = [
     role: "Head of Ops, Fintech",
   },
   {
-    quote: "Finally, automation that doesn’t need a ticket. Our team ships workflows without waiting on engineering.",
+    quote:
+      "Finally, automation that doesn’t need a ticket. Our team ships workflows without waiting on engineering.",
     author: "Jordan Lee",
     role: "Product Lead",
   },

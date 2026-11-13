@@ -83,18 +83,21 @@ This project implements a Zapier-like automation platform using a microservices 
 **Purpose:** User interface for creating and managing Zaps
 
 **Key Features:**
+
 - User authentication (signup/signin)
 - Zap creation and management dashboard
 - Trigger and action selection UI
 - Real-time Zap status
 
 **Technology Stack:**
+
 - Next.js 14
 - React 18
 - Tailwind CSS
 - TypeScript
 
 **Configuration:**
+
 - `BACKEND_URL`: Points to primary-backend API
 - `HOOKS_URL`: Points to hooks service for webhook URLs
 
@@ -105,18 +108,21 @@ This project implements a Zapier-like automation platform using a microservices 
 **Purpose:** Main API server handling user management, authentication, and Zap CRUD operations
 
 **Key Responsibilities:**
+
 - User registration and authentication (JWT-based)
 - Zap creation, retrieval, and management
 - Trigger and action metadata management
 - API route handling
 
 **API Endpoints:**
+
 - `/api/v1/user/*` - User management endpoints
 - `/api/v1/zap/*` - Zap management endpoints
 - `/api/v1/trigger/*` - Trigger metadata endpoints
 - `/api/v1/action/*` - Action metadata endpoints
 
 **Technology Stack:**
+
 - Express.js
 - Prisma ORM
 - PostgreSQL
@@ -126,6 +132,7 @@ This project implements a Zapier-like automation platform using a microservices 
 **Port:** 3000
 
 **Environment Variables:**
+
 - `DATABASE_URL`: PostgreSQL connection string
 - `JWT_PASSWORD`: Secret for JWT token signing
 
@@ -136,15 +143,18 @@ This project implements a Zapier-like automation platform using a microservices 
 **Purpose:** Receives webhook events from external services and triggers Zap executions
 
 **Key Responsibilities:**
+
 - Receive webhook POST requests
 - Create ZapRun records in the database
 - Create ZapRunOutbox entries for event processing
 - Transactional consistency (uses database transactions)
 
 **Endpoint:**
+
 - `POST /hooks/catch/:userId/:zapId` - Webhook receiver endpoint
 
 **Technology Stack:**
+
 - Express.js
 - Prisma ORM
 - PostgreSQL
@@ -152,9 +162,11 @@ This project implements a Zapier-like automation platform using a microservices 
 **Port:** 8000
 
 **Environment Variables:**
+
 - `DATABASE_URL`: PostgreSQL connection string
 
 **Flow:**
+
 1. External service sends webhook to `/hooks/catch/:userId/:zapId`
 2. Service creates a `ZapRun` record with webhook metadata
 3. Service creates a `ZapRunOutbox` entry (transactional)
@@ -167,27 +179,32 @@ This project implements a Zapier-like automation platform using a microservices 
 **Purpose:** Implements the Outbox Pattern - polls the database for pending ZapRunOutbox entries and publishes them to Kafka
 
 **Key Responsibilities:**
+
 - Poll `ZapRunOutbox` table for pending entries
 - Publish ZapRun IDs to Kafka topic `zap-events`
 - Delete processed outbox entries
 - Ensures reliable message delivery
 
 **Technology Stack:**
+
 - KafkaJS (Producer)
 - Prisma ORM with PostgreSQL adapter
 - PostgreSQL
 
 **Environment Variables:**
+
 - `DATABASE_URL`: PostgreSQL connection string
 - `KAFKAJS_NO_PARTITIONER_WARNING`: Suppress warnings (optional)
 
 **Flow:**
+
 1. Continuously polls `ZapRunOutbox` table (batch of 10)
 2. Publishes each ZapRun ID to Kafka topic `zap-events`
 3. Deletes processed outbox entries
 4. Repeats indefinitely
 
 **Why Outbox Pattern?**
+
 - Ensures transactional consistency
 - Prevents message loss if Kafka is temporarily unavailable
 - Allows retry logic for failed publishes
@@ -199,24 +216,28 @@ This project implements a Zapier-like automation platform using a microservices 
 **Purpose:** Consumes Kafka messages and executes Zap actions
 
 **Key Responsibilities:**
+
 - Consume messages from Kafka topic `zap-events`
 - Parse ZapRun data from database
 - Execute actions (Email, Solana transfers, etc.)
 - Handle action failures gracefully
 
 **Technology Stack:**
+
 - KafkaJS (Consumer)
 - Nodemailer (Email actions)
 - Solana Web3.js (SOL transfer actions)
 - Custom parser for template variables
 
 **Environment Variables:**
+
 - `SMTP_ENDPOINT`: SMTP server hostname
 - `SMTP_USERNAME`: SMTP authentication username
 - `SMTP_PASSWORD`: SMTP authentication password
 - `SOL_PRIVATE_KEY`: Base58 encoded Solana private key
 
 **Flow:**
+
 1. Consumes messages from `zap-events` topic
 2. Extracts ZapRun ID from message
 3. Fetches ZapRun and associated Zap from database
@@ -225,6 +246,7 @@ This project implements a Zapier-like automation platform using a microservices 
 6. Commits Kafka offset after successful processing
 
 **Supported Actions:**
+
 - **Email**: Sends email via SMTP using Nodemailer
 - **Solana Transfer**: Sends SOL tokens using Solana Web3.js
 - **Extensible**: New actions can be added by implementing action handlers
@@ -284,6 +306,7 @@ ZapRunOutbox
 ```
 
 **Key Design Decisions:**
+
 - Uses UUIDs for Zap, Trigger, and Action IDs for better distributed system compatibility
 - JSON metadata fields allow flexible configuration without schema changes
 - Outbox pattern table (`ZapRunOutbox`) ensures reliable event processing
@@ -295,12 +318,14 @@ ZapRunOutbox
 **Topic:** `zap-events`
 
 **Message Format:**
+
 - Key: None (or ZapRun ID)
 - Value: ZapRun ID (string)
 
 **Consumer Group:** `main-worker`
 
 **Why Kafka?**
+
 - Decouples processor from worker
 - Provides message persistence and replay capability
 - Supports horizontal scaling of workers
@@ -343,11 +368,13 @@ ZapRunOutbox
 **Purpose:** Ensures reliable message publishing while maintaining transactional consistency
 
 **Implementation:**
+
 - Webhook data is written to `ZapRun` and `ZapRunOutbox` in a single transaction
 - Processor polls `ZapRunOutbox` and publishes to Kafka
 - After successful publish, outbox entry is deleted
 
 **Benefits:**
+
 - Guarantees no message loss if Kafka is down
 - Maintains ACID properties
 - Allows retry logic
@@ -359,11 +386,13 @@ ZapRunOutbox
 **Purpose:** Decouple services and enable asynchronous processing
 
 **Implementation:**
+
 - Hooks service writes to database
 - Processor reads from database and publishes to Kafka
 - Worker consumes from Kafka and executes actions
 
 **Benefits:**
+
 - Services can scale independently
 - Fault tolerance (if worker is down, messages queue in Kafka)
 - Loose coupling between components
@@ -375,11 +404,13 @@ ZapRunOutbox
 **Purpose:** Allow dynamic values in action configurations
 
 **Implementation:**
+
 - Action metadata can contain templates like `{metadata.field}`
 - Parser extracts values from webhook metadata
 - Supports nested fields: `{metadata.user.name}`
 
 **Example:**
+
 - Webhook payload: `{ "user": { "name": "John", "email": "john@example.com" } }`
 - Email body template: `"Hello {metadata.user.name}, you received {metadata.amount} SOL"`
 - Parsed result: `"Hello John, you received 0.5 SOL"`

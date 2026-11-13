@@ -79,7 +79,6 @@ Proxy configuration is mounted read-only; apply a change with `docker compose --
 
 This configuration is for development, not EC2 production. It uses development database credentials, HTTP, Next.js development mode, and a single Kafka broker. Public deployment, password hashing, authenticated webhooks, retry/idempotency behavior, and production image hardening remain separate work.
 
-
 ## Full-stack smoke check
 
 This creates a development-only test account/workflow and confirms email arrives in Mailpit:
@@ -89,7 +88,6 @@ Get-Content -Raw docker/smoke.mjs | docker compose --env-file .env.docker exec -
 ```
 
 This is an operational smoke check, not the planned Jest test suite.
-
 
 ## Verified in this workspace
 

@@ -14,15 +14,11 @@ export const Hero = () => {
           Automate as fast as you can type
         </h1>
         <p className="mt-6 text-body text-neutral-600 leading-relaxed">
-          AI gives you automation superpowers. Pairing AI and Automate helps you
-          turn ideas into workflows that work for you.
+          AI gives you automation superpowers. Pairing AI and Automate helps you turn ideas into
+          workflows that work for you.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => router.push("/signup")}
-          >
+          <Button variant="primary" size="lg" onClick={() => router.push("/signup")}>
             Get started free
           </Button>
           <Button variant="secondary" size="lg" onClick={() => {}}>

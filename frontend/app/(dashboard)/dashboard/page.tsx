@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -62,15 +64,9 @@ export default function DashboardPage() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-display-sm text-neutral-900">My automations</h1>
-          <p className="mt-1 text-body text-neutral-500">
-            Manage and monitor your workflows
-          </p>
+          <p className="mt-1 text-body text-neutral-500">Manage and monitor your workflows</p>
         </div>
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={() => router.push("/zap/create")}
-        >
+        <Button variant="primary" size="lg" onClick={() => router.push("/zap/create")}>
           Create automation
         </Button>
       </div>
@@ -113,19 +109,22 @@ export default function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-neutral-100">
                 {zaps.map((z) => (
-                  <tr
-                    key={z.id}
-                    className="transition-colors duration-fast hover:bg-neutral-50/50"
-                  >
+                  <tr key={z.id} className="transition-colors duration-fast hover:bg-neutral-50/50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <img
+                        <Image
+                          width={32}
+                          height={32}
+                          unoptimized
                           src={z.trigger.type.image}
                           alt=""
                           className="h-8 w-8 rounded-lg object-cover border border-neutral-200"
                         />
                         {z.actions.map((x) => (
-                          <img
+                          <Image
+                            width={32}
+                            height={32}
+                            unoptimized
                             key={x.id}
                             src={x.type.image}
                             alt=""
@@ -137,18 +136,12 @@ export default function DashboardPage() {
                     <td className="px-6 py-4 text-body text-neutral-700 font-mono text-body-sm">
                       {z.id.slice(0, 8)}…
                     </td>
-                    <td className="px-6 py-4 text-body-sm text-neutral-500">
-                      Nov 13, 2023
-                    </td>
+                    <td className="px-6 py-4 text-body-sm text-neutral-500">Nov 13, 2023</td>
                     <td className="px-6 py-4 text-body-sm text-neutral-500 font-mono max-w-[200px] truncate">
                       {`${HOOKS_URL || (typeof window !== "undefined" ? window.location.origin : "")}/hooks/catch/${z.userId}/${z.id}`}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push("/zap/" + z.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => router.push("/zap/" + z.id)}>
                         Open
                       </Button>
                     </td>

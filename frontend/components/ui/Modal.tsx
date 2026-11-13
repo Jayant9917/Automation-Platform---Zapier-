@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { Button } from "./Button";
 
 interface ModalProps {
   isOpen: boolean;
@@ -17,13 +16,7 @@ const sizeClasses = {
   lg: "max-w-2xl",
 };
 
-export function Modal({
-  isOpen,
-  onClose,
-  title,
-  children,
-  size = "md",
-}: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
   useEffect(() => {
     if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
@@ -65,7 +58,13 @@ export function Modal({
             className="rounded-lg p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors duration-fast focus:outline-none focus:ring-2 focus:ring-brand-500"
             aria-label="Close modal"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

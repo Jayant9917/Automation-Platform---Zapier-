@@ -28,5 +28,5 @@ app.use("/api/v1/trigger", triggerRouter);
 app.use("/api/v1/action", actionRouter);
 
 app.listen(PORT, () => {
-    process.stdout.write(`Server running on http://localhost:${PORT}\n`);
+  process.stdout.write(`Server running on http://localhost:${PORT}\n`);
 });

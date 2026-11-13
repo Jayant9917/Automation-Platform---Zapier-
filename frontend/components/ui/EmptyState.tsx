@@ -42,9 +42,7 @@ export function EmptyState({
         {icon}
       </div>
       <h3 className="text-title-sm text-neutral-900 mb-2">{title}</h3>
-      {description && (
-        <p className="text-body text-neutral-500 max-w-sm mb-6">{description}</p>
-      )}
+      {description && <p className="text-body text-neutral-500 max-w-sm mb-6">{description}</p>}
       {action && (
         <Button variant="primary" size="md" onClick={action.onClick}>
           {action.label}

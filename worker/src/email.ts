@@ -29,6 +29,6 @@ export async function sendEmail(to: string, body: string): Promise<void> {
     console.log(`✅ Email sent to ${to}`, info.messageId ? `messageId=${info.messageId}` : "");
   } catch (err) {
     console.error(`❌ Failed to send email to ${to}:`, err);
-    throw err; 
+    throw err;
   }
 }

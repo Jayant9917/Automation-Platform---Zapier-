@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 export function HeroSection() {
@@ -17,14 +16,11 @@ export function HeroSection() {
             <span className="text-brand-600">Without the complexity.</span>
           </h1>
           <p className="mt-6 text-lg text-neutral-600 md:text-xl md:leading-relaxed">
-            Connect your apps in minutes. Build powerful workflows with no code—so you can ship faster and focus on what matters.
+            Connect your apps in minutes. Build powerful workflows with no code—so you can ship
+            faster and focus on what matters.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => router.push("/signup")}
-            >
+            <Button variant="primary" size="lg" onClick={() => router.push("/signup")}>
               Start for Free
             </Button>
             <Button
@@ -48,7 +44,9 @@ export function HeroSection() {
                 <p className="mb-4 text-body-sm font-medium text-neutral-500">Automation flow</p>
                 <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
                   <div className="flex min-w-[200px] items-center gap-3 rounded-xl border-2 border-brand-200 bg-brand-50/50 px-4 py-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-100 text-body font-semibold text-brand-700">1</span>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-100 text-body font-semibold text-brand-700">
+                      1
+                    </span>
                     <div>
                       <p className="text-caption font-medium text-neutral-500">TRIGGER</p>
                       <p className="text-body font-medium text-neutral-900">Webhook</p>
@@ -56,7 +54,9 @@ export function HeroSection() {
                   </div>
                   <div className="hidden sm:block h-0 w-6 border-t-2 border-dashed border-neutral-300" />
                   <div className="flex min-w-[200px] items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-body font-semibold text-neutral-600">2</span>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-body font-semibold text-neutral-600">
+                      2
+                    </span>
                     <div>
                       <p className="text-caption font-medium text-neutral-500">ACTION</p>
                       <p className="text-body font-medium text-neutral-900">Send email</p>
@@ -64,7 +64,9 @@ export function HeroSection() {
                   </div>
                   <div className="hidden sm:block h-0 w-6 border-t-2 border-dashed border-neutral-300" />
                   <div className="flex min-w-[200px] items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-body font-semibold text-neutral-600">3</span>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-neutral-100 text-body font-semibold text-neutral-600">
+                      3
+                    </span>
                     <div>
                       <p className="text-caption font-medium text-neutral-500">ACTION</p>
                       <p className="text-body font-medium text-neutral-900">Notify</p>

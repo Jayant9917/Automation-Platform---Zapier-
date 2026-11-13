@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.next/
+coverage/
+src/generated/
+next-env.d.ts
+*.tsbuildinfo
+package-lock.json
+prisma.config.js
+prisma.config.js.map
+prisma.config.d.ts
+prisma.config.d.ts.map
+.env
+.env.*

@@ -10,7 +10,12 @@ function databaseUrl(): string {
   const value = required("DATABASE_URL");
   try {
     const url = new URL(value);
-    if (!["postgres:", "postgresql:"].includes(url.protocol) || !url.hostname || url.pathname.length < 2) throw new Error();
+    if (
+      !["postgres:", "postgresql:"].includes(url.protocol) ||
+      !url.hostname ||
+      url.pathname.length < 2
+    )
+      throw new Error();
   } catch {
     throw new Error("Invalid PostgreSQL URL: DATABASE_URL");
   }
@@ -18,8 +23,10 @@ function databaseUrl(): string {
 }
 
 function brokers(): string[] {
-  const values = required("KAFKA_BROKERS").split(",").map(value => value.trim());
-  if (values.some(value => !value || !/^(\[[0-9a-fA-F:]+\]|[^\s:/,]+):\d+$/.test(value))) {
+  const values = required("KAFKA_BROKERS")
+    .split(",")
+    .map((value) => value.trim());
+  if (values.some((value) => !value || !/^(\[[0-9a-fA-F:]+\]|[^\s:/,]+):\d+$/.test(value))) {
     throw new Error("Invalid host:port list: KAFKA_BROKERS");
   }
   for (const value of values) {
@@ -35,5 +42,7 @@ function setting(name: string, fallback: string): string {
 }
 
 export const config = {
-  databaseUrl: databaseUrl(), brokers: brokers(), topic: setting("KAFKA_TOPIC", "zap-events"),
+  databaseUrl: databaseUrl(),
+  brokers: brokers(),
+  topic: setting("KAFKA_TOPIC", "zap-events"),
 };
