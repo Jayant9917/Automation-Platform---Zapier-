@@ -1,15 +1,15 @@
-import "dotenv/config";
+import { config } from "./config.js";
 import { Kafka } from "kafkajs";
 import { sendEmail } from "./email.js";
 
-const TOPIC_NAME = "zap-events";
+const TOPIC_NAME = config.topic;
 const kafka = new Kafka({
   clientId: "worker",
-  brokers: ["localhost:9092"],
+  brokers: config.brokers,
 });
 
 async function main() {
-  const consumer = kafka.consumer({ groupId: "main-worker" });
+  const consumer = kafka.consumer({ groupId: config.groupId });
   await consumer.connect();
   await consumer.subscribe({ topic: TOPIC_NAME, fromBeginning: true });
 
@@ -41,4 +41,7 @@ async function main() {
   });
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error("Worker failed:", error);
+  process.exit(1);
+});

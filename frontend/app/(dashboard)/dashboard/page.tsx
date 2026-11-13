@@ -141,7 +141,7 @@ export default function DashboardPage() {
                       Nov 13, 2023
                     </td>
                     <td className="px-6 py-4 text-body-sm text-neutral-500 font-mono max-w-[200px] truncate">
-                      {`${HOOKS_URL}/hooks/catch/1/${z.id}`}
+                      {`${HOOKS_URL || (typeof window !== "undefined" ? window.location.origin : "")}/hooks/catch/${z.userId}/${z.id}`}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Button

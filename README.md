@@ -2,6 +2,22 @@
 
 A Zapier-like automation platform that allows users to create automated workflows (Zaps) by connecting triggers and actions. This project enables users to automate tasks across different services and platforms.
 
+## Unit testing and CI
+
+Jest unit tests and GitHub Actions CI are configured across all five modules. Tests run in network-isolated Docker containers with external dependencies mocked. See [TESTING.md](TESTING.md) for commands, coverage scope, and CI behavior. Integration/end-to-end testing and deployment are outside the current scope.
+
+## Docker Desktop development (current workflow)
+
+Run the application and infrastructure in Docker Desktop. See [the Docker development guide](docker/README.md) for configuration, selective rebuilds, logs, migrations, and data persistence.
+
+```powershell
+docker compose --env-file .env.docker up --build --watch
+```
+
+Open http://localhost:8080 and the test email inbox at http://localhost:8025. Normal source changes sync automatically; only the affected service restarts or rebuilds. Subsequent starts can omit `--build`. The private `.env.docker` is injected by Compose; per-service `.env` files are not needed inside these containers.
+
+The older host installation instructions below are historical and are not the Docker development workflow.
+
 ## 🚀 Features
 
 - **User Authentication**: Sign up and sign in with JWT-based authentication

@@ -4,23 +4,30 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "test": "jest --runInBand",
+    "build": "npm run generate && tsc && node scripts/copy-prisma-engine.js",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "generate": "prisma generate",
+    "test:unit": "jest --runInBand",
+    "test:ci": "jest --ci --runInBand --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.19.2",
+    "@prisma/client": "6.19.2",
     "@types/express": "^5.0.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "prisma": "^6.19.2",
+    "prisma": "6.19.2",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@types/node": "^25.2.0"
+    "@types/node": "^25.2.0",
+    "tsx": "^4.21.0",
+    "jest": "29.7.0",
+    "ts-jest": "29.4.5"
   }
 }

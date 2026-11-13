@@ -1,10 +1,4 @@
-// Backend API (Express). Default 3000 – Next.js usually runs on 3001. Set NEXT_PUBLIC_BACKEND_URL if different.
-export const BACKEND_URL =
-  typeof process.env.NEXT_PUBLIC_BACKEND_URL === "string" && process.env.NEXT_PUBLIC_BACKEND_URL.trim()
-    ? process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/$/, "")
-    : "http://localhost:3000";
-
-export const HOOKS_URL =
-  typeof process.env.NEXT_PUBLIC_HOOKS_URL === "string" && process.env.NEXT_PUBLIC_HOOKS_URL.trim()
-    ? process.env.NEXT_PUBLIC_HOOKS_URL.replace(/\/$/, "")
-    : "http://localhost:3002";
+// Docker serves browser traffic through the same reverse proxy origin.
+// Empty defaults intentionally produce relative /api and /hooks URLs.
+export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL?.trim().replace(/\/$/, "") ?? "";
+export const HOOKS_URL = process.env.NEXT_PUBLIC_HOOKS_URL?.trim().replace(/\/$/, "") ?? "";
