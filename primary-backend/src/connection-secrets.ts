@@ -35,3 +35,23 @@ export function parseGoogleConnection(input: unknown): {
     throw new Error("INVALID_GOOGLE_KEY");
   return { client_email: data.client_email, private_key: data.private_key };
 }
+
+// Discord connections are restricted to the official incoming-webhook endpoint.
+export function parseDiscordConnection(input: unknown): { webhookUrl: string } {
+  const candidate =
+    typeof input === "string" ? input : (input as { webhookUrl?: unknown } | null)?.webhookUrl;
+  if (typeof candidate !== "string") throw new Error("INVALID_DISCORD_CONNECTION");
+  const url = new URL(candidate.trim());
+  if (
+    url.protocol !== "https:" ||
+    url.hostname !== "discord.com" ||
+    url.port ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    !/^\/api\/(?:v10\/)?webhooks\/[0-9]{17,20}\/[A-Za-z0-9_-]{20,200}$/.test(url.pathname)
+  )
+    throw new Error("INVALID_DISCORD_CONNECTION");
+  return { webhookUrl: url.toString() };
+}

@@ -28,7 +28,7 @@ test("lists only the owner's active supported connections, never secrets", async
   expect(args.where).toEqual({
     ownerId: 2,
     revokedAt: null,
-    provider: { in: ["slack.webhook", "google.service_account"] },
+    provider: { in: ["slack.webhook", "google.service_account", "discord.webhook"] },
   });
   expect(args.select.encryptedSecret).toBeUndefined();
   expect(res.json.mock.calls[0][0].connections).toHaveLength(1);
@@ -69,7 +69,7 @@ test("revokes only active supported connections owned by the caller", async () =
       id: "c",
       ownerId: 2,
       revokedAt: null,
-      provider: { in: ["slack.webhook", "google.service_account"] },
+      provider: { in: ["slack.webhook", "google.service_account", "discord.webhook"] },
     },
     data: { revokedAt: expect.any(Date) },
   });
@@ -114,4 +114,18 @@ test.each(["list", "save", "revoke"])(
 test("rejects unsupported providers and parses Google credentials with the shared validator", () => {
   expect(() => validateConnectionSecret("other", {})).toThrow("INVALID_CONNECTION_PROVIDER");
   expect(() => validateConnectionSecret("google.service_account", {})).toThrow();
+});
+
+test("saves a Discord connection encrypted and validates the official host", async () => {
+  req.body.provider = "discord.webhook";
+  req.body.secret =
+    "https://discord.com/api/webhooks/123456789012345678/abcdefghijklmnopqrstuvwxyz_123456";
+  await handlers().save(req, res);
+  expect(res.status).toHaveBeenCalledWith(201);
+  const saved = db.credential.create.mock.calls[0][0].data;
+  expect(saved.provider).toBe("discord.webhook");
+  expect(
+    JSON.parse(decryptSecret(saved.encryptedSecret, key, credentialContext(saved))).webhookUrl,
+  ).toBe(req.body.secret);
+  expect(JSON.stringify(res.json.mock.calls)).not.toContain(req.body.secret);
 });

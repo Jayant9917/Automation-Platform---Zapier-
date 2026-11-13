@@ -1,3 +1,4 @@
+import { createDiscordHandler } from "./actions/discord.js";
 import { config } from "./config.js";
 import { Kafka } from "kafkajs";
 import { PrismaClient } from "./generated/prisma/client.js";
@@ -12,6 +13,7 @@ const kafka = new Kafka({ clientId: "worker", brokers: config.brokers });
 const actionRegistry = {
   email: createEmailHandler(sendEmail),
   "slack.send_message": createSlackHandler(),
+  "discord.send_message": createDiscordHandler(),
   "google_sheets.append_row": createSheetsHandler(),
 };
 

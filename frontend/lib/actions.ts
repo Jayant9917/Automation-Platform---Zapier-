@@ -7,11 +7,13 @@ export type ActionDraft = {
   actionMetadata: Record<string, unknown>;
 };
 export const actionNames: Record<string, string> = {
+  "discord.send_message": "Discord message",
   email: "Email",
   "slack.send_message": "Slack message",
   "google_sheets.append_row": "Google Sheets row",
 };
 export const providers: Record<string, string> = {
+  "discord.send_message": "discord.webhook",
   "slack.send_message": "slack.webhook",
   "google_sheets.append_row": "google.service_account",
 };
@@ -79,7 +81,7 @@ export function newAction(type = "email", trigger = "github.issue_opened"): Acti
             subject: "New issue: {{issue.title}}",
             body: "{{issue.title}}\n{{issue.html_url}}",
           }
-        : type === "slack.send_message"
+        : type === "slack.send_message" || type === "discord.send_message"
           ? { text: "New issue in {{repository.full_name}}: {{issue.title}}\n{{issue.html_url}}" }
           : {
               spreadsheetId: "",
@@ -113,7 +115,7 @@ export function newAction(type = "email", trigger = "github.issue_opened"): Acti
             subject: "Thanks for contacting us",
             body: "Hello {{tally.name}},\nWe received your message: {{tally.message}}",
           }
-        : type === "slack.send_message"
+        : type === "slack.send_message" || type === "discord.send_message"
           ? { text: "New submission from {{tally.name}} ({{tally.email}}): {{tally.message}}" }
           : {
               spreadsheetId: "",

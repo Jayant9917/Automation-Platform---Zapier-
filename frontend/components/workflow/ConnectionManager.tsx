@@ -98,7 +98,7 @@ export function ConnectionManager({
       {!compact && (
         <CardHeader
           title="Your connections"
-          subtitle="Save your own Slack channel and Google service account. Credentials are private and are not displayed again."
+          subtitle="Save your own Discord/Slack channel and Google service account. Credentials are private and are not displayed again."
         />
       )}
       {compact && (
@@ -122,7 +122,13 @@ export function ConnectionManager({
               <span>
                 {connection.name}{" "}
                 <small>
-                  ({connection.provider === "slack.webhook" ? "Slack" : "Google Sheets"})
+                  (
+                  {connection.provider === "discord.webhook"
+                    ? "Discord"
+                    : connection.provider === "slack.webhook"
+                      ? "Slack"
+                      : "Google Sheets"}
+                  )
                 </small>
               </span>
               <div className="flex flex-wrap gap-2">
@@ -175,12 +181,17 @@ export function ConnectionManager({
               setSecret("");
             }}
           >
+            <option value="discord.webhook">Discord incoming webhook</option>
             <option value="slack.webhook">Slack incoming webhook</option>
             <option value="google.service_account">Google Sheets service account</option>
           </select>
         </label>
         <label htmlFor="connection-secret" className="block">
-          {provider === "slack.webhook" ? "Slack webhook URL" : "Google service-account JSON"}
+          {provider === "discord.webhook"
+            ? "Discord webhook URL"
+            : provider === "slack.webhook"
+              ? "Slack webhook URL"
+              : "Google service-account JSON"}
         </label>
         <textarea
           id="connection-secret"
@@ -188,15 +199,17 @@ export function ConnectionManager({
           spellCheck={false}
           required
           maxLength={30000}
-          rows={provider === "slack.webhook" ? 2 : 6}
+          rows={provider === "google.service_account" ? 6 : 2}
           value={secret}
           onChange={(e) => setSecret(e.target.value)}
           className="w-full rounded-xl border p-3"
         />
         <p className="text-body-sm text-neutral-500">
-          {provider === "slack.webhook"
-            ? "Use the incoming webhook URL for the channel where you want messages. This is not a Slack bot token."
-            : "Paste the downloaded service-account JSON. Enable Sheets API and share your spreadsheet with its client_email as Editor. A Google API key alone is not sufficient."}
+          {provider === "discord.webhook"
+            ? "Paste the webhook URL from your Discord text channel settings → Integrations → Webhooks. This is not a bot token."
+            : provider === "slack.webhook"
+              ? "Use the incoming webhook URL for the channel where you want messages. This is not a Slack bot token."
+              : "Paste the downloaded service-account JSON. Enable Sheets API and share your spreadsheet with its client_email as Editor. A Google API key alone is not sufficient."}
         </p>
         <Button type="submit" disabled={saving}>
           {saving ? "Saving connection..." : "Save connection"}

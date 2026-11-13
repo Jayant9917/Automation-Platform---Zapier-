@@ -14,6 +14,13 @@ import type { ActionDraft } from "@/lib/actions";
 
 const apps = [
   {
+    id: "discord.send_message",
+    name: "Discord",
+    event: "Send a channel message",
+    image: "/discord.svg",
+    description: "Post a message using your Discord connection.",
+  },
+  {
     id: "email",
     name: "Email",
     event: "Send an email",
@@ -24,14 +31,14 @@ const apps = [
     id: "slack.send_message",
     name: "Slack",
     event: "Send a channel message",
-    image: "/slack.svg",
+    image: "/slack.png",
     description: "Post a message using your Slack connection.",
   },
   {
     id: "google_sheets.append_row",
     name: "Google Sheets",
     event: "Append a spreadsheet row",
-    image: "/sheets.svg",
+    image: "/sheets.png",
     description: "Record event details in your spreadsheet.",
   },
 ];

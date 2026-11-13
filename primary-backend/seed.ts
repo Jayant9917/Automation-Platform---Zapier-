@@ -4,8 +4,9 @@ import { PrismaClient } from "./src/generated/prisma-new/client.js";
 const prisma = new PrismaClient();
 
 const AVAILABLE_ACTIONS = [
-  { id: "slack.send_message", name: "Slack message", image: "/slack.svg" },
-  { id: "google_sheets.append_row", name: "Google Sheets row", image: "/sheets.svg" },
+  { id: "discord.send_message", name: "Discord message", image: "/discord.svg" },
+  { id: "slack.send_message", name: "Slack message", image: "/slack.png" },
+  { id: "google_sheets.append_row", name: "Google Sheets row", image: "/sheets.png" },
   { id: "email", name: "Email", image: "https://cdn-icons-png.flaticon.com/512/561/561127.png" },
 ];
 

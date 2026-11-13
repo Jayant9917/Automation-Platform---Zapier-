@@ -238,17 +238,23 @@ export function ActionListEditor({
                 />
               </>
             )}
-            {view !== "connection" && action.availableActionId === "slack.send_message" && (
-              <TemplateField
-                fields={fields}
-                label="Slack message"
-                id={`${id}-text`}
-                value={text("text")}
-                onChange={(v) => metadata("text", v)}
-                multiline
-                limit={3000}
-              />
-            )}
+            {view !== "connection" &&
+              (action.availableActionId === "slack.send_message" ||
+                action.availableActionId === "discord.send_message") && (
+                <TemplateField
+                  fields={fields}
+                  label={
+                    action.availableActionId === "discord.send_message"
+                      ? "Discord message"
+                      : "Slack message"
+                  }
+                  id={`${id}-text`}
+                  value={text("text")}
+                  onChange={(v) => metadata("text", v)}
+                  multiline
+                  limit={action.availableActionId === "discord.send_message" ? 2000 : 3000}
+                />
+              )}
             {view !== "connection" && action.availableActionId === "google_sheets.append_row" && (
               <>
                 <Input

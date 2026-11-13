@@ -2,9 +2,13 @@ import { randomUUID } from "node:crypto";
 import type { Request, Response } from "express";
 import { z } from "zod";
 import type { PrismaClient } from "./generated/prisma-new/client.js";
-import { parseSlackConnection, parseGoogleConnection } from "./connection-secrets.js";
+import {
+  parseSlackConnection,
+  parseGoogleConnection,
+  parseDiscordConnection,
+} from "./connection-secrets.js";
 import { encryptSecret, credentialContext } from "./credentials.js";
-const providers = ["slack.webhook", "google.service_account"] as const;
+const providers = ["slack.webhook", "google.service_account", "discord.webhook"] as const;
 const schema = z.object({
   name: z.string().trim().min(1).max(80),
   provider: z.enum(providers),
@@ -13,6 +17,7 @@ const schema = z.object({
 const safeFields = { id: true, name: true, provider: true, createdAt: true } as const;
 
 export function validateConnectionSecret(provider: string, input: unknown): unknown {
+  if (provider === "discord.webhook") return parseDiscordConnection(input);
   if (provider === "slack.webhook") return parseSlackConnection(input);
   if (provider === "google.service_account") return parseGoogleConnection(input);
   throw new Error("INVALID_CONNECTION_PROVIDER");
@@ -53,9 +58,9 @@ export function createConnectionHandlers(
       try {
         secret = validateConnectionSecret(parsed.data.provider, parsed.data.secret);
       } catch {
-        return res
-          .status(400)
-          .json({ error: "Invalid Slack webhook URL or Google service-account credentials" });
+        return res.status(400).json({
+          error: "Invalid Discord/Slack webhook URL or Google service-account credentials",
+        });
       }
       const id =
         typeof req.params.connectionId === "string" ? req.params.connectionId : randomUUID();
