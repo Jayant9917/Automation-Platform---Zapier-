@@ -1,5 +1,7 @@
 # Zapier Clone - Automation Platform
 
+[![CI](https://github.com/Jayant9917/Automation-Platform---Zapier-/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Jayant9917/Automation-Platform---Zapier-/actions/workflows/ci.yml)
+
 A Zapier-like automation platform that allows users to create automated workflows (Zaps) by connecting triggers and actions. This project enables users to automate tasks across different services and platforms.
 
 ## Unit testing and CI
