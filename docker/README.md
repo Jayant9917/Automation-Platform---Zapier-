@@ -4,7 +4,7 @@ All application processes and infrastructure run in Linux containers. Install/st
 
 ## First start
 
-A private `.env.docker` has been created for this workspace with a generated development JWT secret. For another checkout, copy `.env.docker.example` to `.env.docker` and set a random secret. Never commit the private file.
+A private `.env.docker` has been created for this workspace with a private JWT secret and credential encryption key. For another checkout, copy `.env.docker.example` to `.env.docker` and set a random JWT secret and CREDENTIAL_ENCRYPTION_KEY (32 random bytes encoded as 64 hexadecimal characters). Keep the encryption key stable and back it up privately; changing it makes saved provider credentials unreadable. Never commit the private file.
 
 ```powershell
 docker compose --env-file .env.docker up --build --watch
@@ -99,3 +99,11 @@ This is an operational smoke check, not the planned Jest test suite.
 - Kafka's first-start volume permission is initialized by an isolated one-shot task; the broker runs as its normal non-root user.
 
 These are development smoke checks. Jest suites, automated browser testing, and CI/CD remain upcoming work.
+
+## GitHub trigger setup
+
+Open a saved workflow at `/zap/<id>` and use its GitHub: issue opened panel. Enter owner/repository and the same secret configured in GitHub. The API encrypts the secret; hooks verifies raw-body signatures, filters issue-opened events, and records delivery IDs before creating action jobs. Email remains on Mailpit.
+
+A private `GITHUB_SECRETS` value can optionally be imported only by the owner of the workflow named by `GITHUB_SETUP_WORKFLOW_ID`. Other workflows need their own secret. These variables are setup-only and are never sent to the frontend. Do not use the JWT secret as the webhook secret or credential encryption key.
+
+After saving, enable the GitHub webhook and redeliver a ping. A 404 can mean the connection has not been configured or is disabled. GitHub continues to show a previous failure until a new delivery occurs. Keep the tunnel running, and use its HTTPS origin with `/hooks/github/<id>`.

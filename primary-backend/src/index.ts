@@ -1,4 +1,7 @@
 import { prismaClient } from "./db/index.js";
+import { Router } from "express";
+import { authMiddleware } from "./middleware.js";
+import { createConnectionHandlers } from "./connections.js";
 import { config } from "./config.js";
 console.log("[primary-backend] Starting...");
 import express from "express";
@@ -21,6 +24,15 @@ app.get("/health", async (_req, res) => {
   }
 });
 app.use(cors());
+
+const connections = createConnectionHandlers(prismaClient, config.encryptionKey);
+const connectionRouter = Router();
+connectionRouter.use(authMiddleware);
+connectionRouter.get("/", connections.list);
+connectionRouter.post("/", connections.save);
+connectionRouter.put("/:connectionId", connections.save);
+connectionRouter.delete("/:connectionId", connections.revoke);
+app.use("/api/v1/connections", connectionRouter);
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/zap", zapRouter);

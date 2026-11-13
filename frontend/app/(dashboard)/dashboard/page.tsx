@@ -138,7 +138,7 @@ export default function DashboardPage() {
                     </td>
                     <td className="px-6 py-4 text-body-sm text-neutral-500">Nov 13, 2023</td>
                     <td className="px-6 py-4 text-body-sm text-neutral-500 font-mono max-w-[200px] truncate">
-                      {`${HOOKS_URL || (typeof window !== "undefined" ? window.location.origin : "")}/hooks/catch/${z.userId}/${z.id}`}
+                      {`${HOOKS_URL || (typeof window !== "undefined" ? window.location.origin : "")}${z.trigger.type.id === "tally.form_submitted" ? `/hooks/tally/${z.id}` : z.trigger.type.id.startsWith("github.") ? `/hooks/github/${z.id}` : `/hooks/catch/${z.userId}/${z.id}`}`}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Button variant="ghost" size="sm" onClick={() => router.push("/zap/" + z.id)}>

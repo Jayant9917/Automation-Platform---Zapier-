@@ -5,16 +5,27 @@ interface WorkflowNodeProps {
   label: string;
   type: "trigger" | "action";
   onClick: () => void;
+  subtitle?: string;
+  selected?: boolean;
 }
 
-export function WorkflowNode({ index, label, type, onClick }: WorkflowNodeProps) {
+export function WorkflowNode({
+  index,
+  label,
+  type,
+  onClick,
+  subtitle,
+  selected = false,
+}: WorkflowNodeProps) {
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={selected}
       className={`
-        flex min-w-[280px] max-w-[320px] items-center gap-4 rounded-2xl border-2 bg-white px-5 py-4
+        flex w-[min(350px,calc(100vw-4rem))] min-w-[260px] max-w-[350px] items-center gap-4 rounded-2xl border-2 bg-white px-5 py-4
         text-left transition-all duration-fast
+        ${selected ? "ring-4 ring-brand-100 border-brand-400" : ""}
         focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2
         ${
           type === "trigger"
@@ -34,6 +45,7 @@ export function WorkflowNode({ index, label, type, onClick }: WorkflowNodeProps)
       <div className="min-w-0 flex-1">
         <p className="text-caption font-medium uppercase tracking-wide text-neutral-500">{type}</p>
         <p className="truncate text-body font-medium text-neutral-900">{label}</p>
+        {subtitle && <p className="mt-1 truncate text-caption text-neutral-500">{subtitle}</p>}
       </div>
       <svg
         className="h-5 w-5 shrink-0 text-neutral-400"

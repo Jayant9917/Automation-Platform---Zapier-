@@ -84,3 +84,8 @@ test("does not require STARTTLS when implicit TLS is configured", () => {
     config.smtp.secure = false;
   }
 });
+
+test("accepts a configured dynamic subject", async () => {
+  await sendEmail("unit@test.dev", "Body", "Issue: Bug");
+  expect(sendMail).toHaveBeenCalledWith(expect.objectContaining({ subject: "Issue: Bug" }));
+});

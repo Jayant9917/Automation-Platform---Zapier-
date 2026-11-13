@@ -43,3 +43,10 @@ test.each(["", "abc", "0", "65536", "1.5", "-1"])("rejects invalid port %s", (va
   process.env.PORT = value;
   expect(load).toThrow(/PORT/);
 });
+
+test("validates credential encryption keys at startup", () => {
+  process.env.CREDENTIAL_ENCRYPTION_KEY = "invalid";
+  expect(load).toThrow(/CREDENTIAL_ENCRYPTION_KEY/);
+  process.env.CREDENTIAL_ENCRYPTION_KEY = "ab".repeat(32);
+  expect(load().config.encryptionKey).toBe(process.env.CREDENTIAL_ENCRYPTION_KEY);
+});

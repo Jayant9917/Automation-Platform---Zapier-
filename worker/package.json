@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand",
-    "build": "tsc",
+    "build": "npm run generate && tsc && node scripts/copy-prisma-engine.js",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test:unit": "jest --runInBand",
@@ -13,7 +13,8 @@
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx,.mjs,.cjs --max-warnings 0",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "generate": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -26,7 +27,10 @@
     "bs58": "^6.0.0",
     "kafkajs": "^2.2.4",
     "nodemailer": "^8.0.1",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "@prisma/client": "6.19.2",
+    "prisma": "6.19.2",
+    "google-auth-library": "11.3.4"
   },
   "devDependencies": {
     "@types/node": "^25.2.1",

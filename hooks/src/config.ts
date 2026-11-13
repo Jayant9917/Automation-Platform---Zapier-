@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { readEncryptionKey } from "./credentials.js";
 
 function required(name: string): string {
   const value = process.env[name];
@@ -33,4 +34,8 @@ function databaseUrl(): string {
   return value;
 }
 
-export const config = { databaseUrl: databaseUrl(), port: port("PORT", 3002) };
+export const config = {
+  databaseUrl: databaseUrl(),
+  port: port("PORT", 3002),
+  encryptionKey: readEncryptionKey(process.env.CREDENTIAL_ENCRYPTION_KEY),
+};

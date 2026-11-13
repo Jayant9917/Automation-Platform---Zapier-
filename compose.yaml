@@ -1,13 +1,11 @@
+# Development stack: docker compose --env-file .env.docker up --watch
+# Containers use service names (postgres, kafka), rather than your PC address.
+# Watch actions: sync = copy files; sync+restart = copy and restart that service;
+# rebuild = rebuild only the service whose dependency or Dockerfile changed.
 name: actionhub-dev
 
-x-database: &database
-  DATABASE_URL: postgresql://actionhub:actionhub_dev@postgres:5432/actionhub
-
-x-kafka: &kafka-client
-  KAFKA_BROKERS: kafka:9092
-  KAFKA_TOPIC: zap-events
-
 services:
+  # Stores users, workflows, and execution records. The volume keeps data after restarts.
   postgres:
     image: postgres:16-alpine
     environment:
@@ -22,6 +20,7 @@ services:
       timeout: 3s
       retries: 30
 
+  # One-time task: give Kafka permission to write to its saved data folder.
   kafka-volume-init:
     image: apache/kafka:3.9.1
     user: "0:0"
@@ -29,10 +28,12 @@ services:
     volumes:
       - kafka-data:/kafka-data
 
+  # Message queue between the processor and worker. These settings run one development broker.
   kafka:
     image: apache/kafka:3.9.1
     depends_on:
-      kafka-volume-init: { condition: service_completed_successfully }
+      kafka-volume-init:
+        condition: service_completed_successfully
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -61,10 +62,12 @@ services:
       retries: 30
       start_period: 15s
 
+  # One-time task: create the zap-events topic if it does not exist.
   kafka-init:
     image: apache/kafka:3.9.1
     depends_on:
-      kafka: { condition: service_healthy }
+      kafka:
+        condition: service_healthy
     entrypoint: [/opt/kafka/bin/kafka-topics.sh]
     command:
       [
@@ -80,24 +83,34 @@ services:
         "1",
       ]
 
+  # One-time task: apply database migrations and seed the initial trigger/action types.
   db-init:
     image: actionhub-primary-backend-dev
     pull_policy: never
-    environment: *database
+    environment:
+      DATABASE_URL: postgresql://actionhub:actionhub_dev@postgres:5432/actionhub
     depends_on:
-      postgres: { condition: service_healthy }
+      postgres:
+        condition: service_healthy
     command: [sh, -c, "npx prisma migrate deploy --config prisma.config.ts && npx tsx seed.ts"]
 
+  # API for login and managing workflows. Waits for database setup to finish.
   primary-backend:
     image: actionhub-primary-backend-dev
-    build: { context: ./primary-backend, target: development }
+    build:
+      context: ./primary-backend
+      target: development
     init: true
     environment:
-      <<: *database
+      DATABASE_URL: postgresql://actionhub:actionhub_dev@postgres:5432/actionhub
       PORT: 3000
       JWT_PASSWORD: ${JWT_PASSWORD:?Set JWT_PASSWORD in .env.docker}
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?Set CREDENTIAL_ENCRYPTION_KEY in .env.docker}
+      GITHUB_SECRETS: ${GITHUB_SECRETS:-}
+      GITHUB_SETUP_WORKFLOW_ID: ${GITHUB_SETUP_WORKFLOW_ID:-}
     depends_on:
-      db-init: { condition: service_completed_successfully }
+      db-init:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
@@ -149,15 +162,20 @@ services:
         - action: rebuild
           path: ./primary-backend/prisma
 
+  # Receives webhook requests and saves workflow runs to the database.
   hooks:
     image: actionhub-hooks-dev
-    build: { context: ./hooks, target: development }
+    build:
+      context: ./hooks
+      target: development
     init: true
     environment:
-      <<: *database
+      DATABASE_URL: postgresql://actionhub:actionhub_dev@postgres:5432/actionhub
       PORT: 3002
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?Set CREDENTIAL_ENCRYPTION_KEY in .env.docker}
     depends_on:
-      db-init: { condition: service_completed_successfully }
+      db-init:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
@@ -209,15 +227,22 @@ services:
         - action: rebuild
           path: ./hooks/prisma
 
+  # Reads pending database events and publishes messages to Kafka.
   processor:
     image: actionhub-processor-dev
-    build: { context: ./processor, target: development }
+    build:
+      context: ./processor
+      target: development
     init: true
     environment:
-      <<: [*database, *kafka-client]
+      DATABASE_URL: postgresql://actionhub:actionhub_dev@postgres:5432/actionhub
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: zap-events
     depends_on:
-      db-init: { condition: service_completed_successfully }
-      kafka-init: { condition: service_completed_successfully }
+      db-init:
+        condition: service_completed_successfully
+      kafka-init:
+        condition: service_completed_successfully
     develop:
       watch:
         - action: sync+restart
@@ -258,17 +283,24 @@ services:
         - action: rebuild
           path: ./processor/prisma
 
+  # Development inbox: view captured emails at http://localhost:8025.
   mailpit:
     image: axllent/mailpit:v1.27
     ports:
       - "127.0.0.1:${MAIL_PORT:-8025}:8025"
 
+  # Consumes Kafka messages and sends emails to the development inbox.
   worker:
     image: actionhub-worker-dev
-    build: { context: ./worker, target: development }
+    build:
+      context: ./worker
+      target: development
     init: true
     environment:
-      <<: *kafka-client
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?Set CREDENTIAL_ENCRYPTION_KEY in .env.docker}
+      DATABASE_URL: postgresql://actionhub:actionhub_dev@postgres:5432/actionhub
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: zap-events
       KAFKA_GROUP_ID: main-worker
       SMTP_ENDPOINT: mailpit
       SMTP_PORT: 1025
@@ -276,8 +308,12 @@ services:
       SMTP_REQUIRE_TLS: "false"
       SMTP_FROM: workflows@actionhub.test
     depends_on:
-      kafka-init: { condition: service_completed_successfully }
-      mailpit: { condition: service_started }
+      db-init:
+        condition: service_completed_successfully
+      kafka-init:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
     develop:
       watch:
         - action: sync+restart
@@ -312,10 +348,19 @@ services:
           path: ./worker/Dockerfile
         - action: rebuild
           path: ./worker/.dockerignore
+        - action: rebuild
+          path: ./worker/prisma
+        - action: rebuild
+          path: ./worker/prisma.config.ts
+        - action: rebuild
+          path: ./worker/scripts
 
+  # Next.js interface. Empty public URLs send browser requests through the proxy.
   frontend:
     image: actionhub-frontend-dev
-    build: { context: ./frontend, target: development }
+    build:
+      context: ./frontend
+      target: development
     init: true
     environment:
       NEXT_PUBLIC_BACKEND_URL: ""
@@ -388,6 +433,7 @@ services:
         - action: rebuild
           path: ./frontend/.dockerignore
 
+  # Browser entry point at http://localhost:8080. Routes UI, API, and webhook requests.
   proxy:
     image: nginx:1.28-alpine
     ports:
@@ -395,10 +441,14 @@ services:
     volumes:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      frontend: { condition: service_healthy }
-      primary-backend: { condition: service_healthy }
-      hooks: { condition: service_healthy }
+      frontend:
+        condition: service_healthy
+      primary-backend:
+        condition: service_healthy
+      hooks:
+        condition: service_healthy
 
+# Persistent application data. Do not use down --volumes unless you want to delete it.
 volumes:
   postgres-data:
   kafka-data:

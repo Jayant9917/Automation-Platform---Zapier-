@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { readEncryptionKey } from "./credentials.js";
 
 function required(name: string): string {
   const value = process.env[name];
@@ -47,6 +48,8 @@ function boolean(name: string, fallback: boolean): boolean {
 const smtpPort = port("SMTP_PORT", 587);
 const smtpAuth = boolean("SMTP_AUTH", true);
 export const config = {
+  databaseUrl: required("DATABASE_URL"),
+  encryptionKey: readEncryptionKey(process.env.CREDENTIAL_ENCRYPTION_KEY),
   brokers: brokers(),
   topic: setting("KAFKA_TOPIC", "zap-events"),
   groupId: setting("KAFKA_GROUP_ID", "main-worker"),

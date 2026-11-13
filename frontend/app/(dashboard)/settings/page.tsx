@@ -1,5 +1,6 @@
 "use client";
 
+import { ConnectionManager } from "@/components/workflow/ConnectionManager";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -13,6 +14,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-8 max-w-2xl">
+        <ConnectionManager />
         <Card padding="lg">
           <CardHeader title="Profile" subtitle="Update your personal information" />
           <div className="space-y-4">

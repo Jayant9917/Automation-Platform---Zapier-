@@ -1,3 +1,5 @@
+# GitHub runs these checks for pull requests and pushes to main.
+# Each service gets its own job. Unit tests use no database, Kafka, or network.
 name: Quality checks and unit tests
 
 on:
@@ -9,6 +11,7 @@ on:
 permissions:
   contents: read
 
+# Cancel an older run when a newer commit arrives on the same branch.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -20,11 +23,14 @@ jobs:
     timeout-minutes: 25
     strategy:
       fail-fast: false
+      # Repeat the steps below once for each service.
       matrix:
         service: [frontend, primary-backend, hooks, processor, worker]
     steps:
+      # Download the repository and prepare Docker image building.
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+      # Reuse cached layers; install dependencies only when their files change.
       - name: Build isolated development/test image
         uses: docker/build-push-action@v7
         with:
@@ -35,6 +41,7 @@ jobs:
           tags: actionhub-${{ matrix.service }}-ci:latest
           cache-from: type=gha,scope=unit-${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=unit-${{ matrix.service }}
+      # Check code style, formatting, tests, types, and the production build.
       - name: ESLint (network disabled)
         run: docker run --rm --network none actionhub-${{ matrix.service }}-ci:latest npm run lint
       - name: Prettier module check (network disabled)
@@ -54,6 +61,7 @@ jobs:
       - name: Verify production build
         # Placeholder is used for Prisma code generation only. No database is started.
         run: docker run --rm -e DATABASE_URL=postgresql://build:build@unused:5432/build_only actionhub-${{ matrix.service }}-ci:latest npm run build
+      # Save coverage in the GitHub run, even if a later check fails.
       - name: Extract coverage
         if: always() && steps.unit_tests.outcome != 'skipped'
         run: docker cp unit-tests:/app/coverage ./coverage

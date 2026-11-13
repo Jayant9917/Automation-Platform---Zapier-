@@ -1,0 +1,194 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  credentials Credential[]
+  id            Int     @id @default(autoincrement()) 
+  name          String?
+  email         String @unique
+  password      String
+  zaps          Zap[]
+}
+
+model Zap {
+  tallyTrigger TallyTrigger?
+  tallyDeliveries TallyDelivery[]
+  actionsRevision Int @default(0)
+  githubTrigger GithubTrigger?
+  githubDeliveries GithubDelivery[]
+  id                     String   @id @default(uuid())
+ userId      Int                    @map("user_id")
+  user        User        @relation(fields: [userId], references: [id])
+  triggerId   String?    
+  trigger    Trigger? 
+  actions Action[]
+  zapRuns ZapRun[]
+}
+
+
+model Trigger {
+  id            String          @id @default(uuid())
+  triggerId    String 
+  ZapId        String                @unique
+  Metadata Json @default("{}")
+  type        AvailableTriggers      @relation(fields: [triggerId], references: [id])
+  zap         Zap     @relation(fields: [ZapId], references: [id])
+}
+
+model AvailableTriggers {
+  id           String         @id @default(uuid())
+  name         String
+  image String
+  triggers     Trigger[]
+}
+
+model Action {
+  credentialId String?
+  credential Credential? @relation(fields: [credentialId], references: [id], onDelete: Restrict)
+  id String @id @default(uuid())
+  zapId String
+  zap  Zap @relation(fields: [zapId], references: [id])
+  actionId String
+  Metadata Json @default("{}")
+  type AvailableActions @relation(fields: [actionId], references: [id])
+  sortingOrder Int @default(0)
+
+}
+ 
+model AvailableActions {
+  id String @id @default(uuid())
+  name String
+  image String
+  actions Action[]
+}
+
+model ZapRun {
+  tallyDelivery TallyDelivery?
+  githubDelivery GithubDelivery?
+  actionRuns ActionRun[]
+  createdAt DateTime @default(now())
+  id String @id @default(uuid())
+  metadata Json
+  zapId String
+  zap Zap @relation(fields: [zapId], references: [id])
+  zapRunOutbox ZapRunOutbox?
+}
+
+model ZapRunOutbox {
+  id String @id @default(uuid())
+  zapRunId  String @unique
+  zapRun ZapRun @relation(fields: [zapRunId], references: [id])
+} 
+
+// One immutable action snapshot per workflow run. Retries reuse this same record.
+model ActionRun {
+  credentialId String?
+  credential Credential? @relation(fields: [credentialId], references: [id], onDelete: Restrict)
+  id             String   @id @default(uuid())
+  zapRunId       String
+  actionId       String
+  type           String
+  config         Json
+  status         String   @default("pending")
+  attempts       Int      @default(0)
+  nextAttemptAt  DateTime @default(now())
+  dispatchAfter  DateTime @default(now())
+  claimToken     String?
+  leaseUntil     DateTime?
+  errorCode      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  zapRun         ZapRun   @relation(fields: [zapRunId], references: [id], onDelete: Cascade)
+
+  @@unique([zapRunId, actionId])
+  @@index([status, nextAttemptAt, dispatchAfter])
+  @@index([status, leaseUntil])
+}
+
+// Compatibility receipts for old email-only Kafka messages that contain no workflow ID.
+model LegacyJob {
+  id String @id
+  status String @default("pending")
+  leaseUntil DateTime?
+  errorCode String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, leaseUntil])
+}
+
+// Credentials are encrypted with a key supplied outside the database.
+model Credential {
+  tallyTrigger TallyTrigger?
+  name String @default("Connection")
+  revokedAt DateTime?
+  actions Action[]
+  actionRuns ActionRun[]
+  id String @id @default(uuid())
+  ownerId Int
+  provider String
+  encryptedSecret String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  githubTrigger GithubTrigger?
+  @@index([ownerId, provider])
+}
+
+model GithubTrigger {
+  workflowId String @id
+  repository String
+  credentialId String @unique
+  enabled Boolean @default(true)
+  revision Int @default(1)
+  workflow Zap @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  credential Credential @relation(fields: [credentialId], references: [id], onDelete: Restrict)
+}
+
+model GithubDelivery {
+  id String @id @default(uuid())
+  workflowId String
+  deliveryId String
+  payloadHash String
+  zapRunId String @unique
+  createdAt DateTime @default(now())
+  workflow Zap @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  zapRun ZapRun @relation(fields: [zapRunId], references: [id], onDelete: Cascade)
+  @@unique([workflowId, deliveryId])
+}
+
+model TallyTrigger {
+  workflowId String @id
+  formId String
+  credentialId String @unique
+  enabled Boolean @default(true)
+  revision Int @default(1)
+  workflow Zap @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  credential Credential @relation(fields: [credentialId], references: [id], onDelete: Restrict)
+}
+
+model TallyDelivery {
+  id String @id @default(uuid())
+  workflowId String
+  deliveryId String
+  payloadHash String
+  zapRunId String @unique
+  createdAt DateTime @default(now())
+  workflow Zap @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  zapRun ZapRun @relation(fields: [zapRunId], references: [id], onDelete: Cascade)
+  @@unique([workflowId, deliveryId])
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,6 +8,7 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   size?: "sm" | "md" | "lg";
+  placement?: "center" | "right";
 }
 
 const sizeClasses = {
@@ -16,25 +17,64 @@ const sizeClasses = {
   lg: "max-w-2xl",
 };
 
-export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = "md",
+  placement = "center",
+}: ModalProps) {
+  const panel = useRef<HTMLDivElement>(null);
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
     if (!isOpen) return;
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleEscape);
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "";
+    panel.current?.focus();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close.current();
+      if (event.key !== "Tab") return;
+      const controls = Array.from(
+        panel.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href], [tabindex="0"]',
+        ) ?? [],
+      ).filter((element) => !element.closest("[hidden]"));
+      const first = controls[0],
+        last = controls[controls.length - 1];
+      if (!first || !last) {
+        event.preventDefault();
+        return;
+      }
+      if (
+        event.shiftKey &&
+        (document.activeElement === first || document.activeElement === panel.current)
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        (document.activeElement === last || document.activeElement === panel.current)
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-  }, [isOpen, onClose]);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = overflow;
+      if (previous?.isConnected) previous.focus();
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className={`fixed inset-0 z-50 flex items-center p-3 sm:p-5 ${placement === "right" ? "justify-end" : "justify-center"}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -45,7 +85,9 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
         aria-hidden="true"
       />
       <div
-        className={`relative w-full ${sizeClasses[size]} rounded-2xl border border-neutral-200 bg-white shadow-soft-lg animate-modal-in`}
+        ref={panel}
+        tabIndex={-1}
+        className={`relative w-full ${placement === "right" ? "max-w-xl" : sizeClasses[size]} rounded-2xl border border-neutral-200 bg-white shadow-soft-lg animate-modal-in`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
@@ -69,7 +111,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
             </svg>
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto p-6">{children}</div>
+        <div className="max-h-[75dvh] overflow-y-auto p-5 sm:p-6">{children}</div>
       </div>
     </div>
   );

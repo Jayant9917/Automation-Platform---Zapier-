@@ -91,3 +91,8 @@ test("supports an explicit worker group", () => {
   process.env.KAFKA_GROUP_ID = "unit-worker";
   expect(load().config.groupId).toBe("unit-worker");
 });
+
+test("requires database access for action tracking", () => {
+  delete process.env.DATABASE_URL;
+  expect(load).toThrow("DATABASE_URL");
+});

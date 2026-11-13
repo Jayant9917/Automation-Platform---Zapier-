@@ -1,76 +1,23 @@
+import { createTallySetupHandlers } from "../tally-setup.js";
 import { Router } from "express";
 import { authMiddleware } from "../middleware.js";
-import { ZapCreateSchema } from "../types.js";
+import { createWorkflowActionHandlers } from "../workflow-actions.js";
 import { prismaClient } from "../db/index.js";
-import type { Prisma } from "@prisma/client";
+import { config } from "../config.js";
+import { createGitHubSetupHandlers } from "../github-setup.js";
+import { createExecutionHistoryHandler } from "../execution-history.js";
 
 const router = Router();
+const tallySetup = createTallySetupHandlers(prismaClient, config.encryptionKey);
+router.get("/:zapId/tally-trigger", authMiddleware, tallySetup.get);
+router.put("/:zapId/tally-trigger", authMiddleware, tallySetup.save);
+const githubSetup = createGitHubSetupHandlers(prismaClient, config);
+router.get("/:zapId/github-trigger", authMiddleware, githubSetup.get);
+router.put("/:zapId/github-trigger", authMiddleware, githubSetup.save);
 
-router.post("/", authMiddleware, async (req, res) => {
-  const id = req.id;
-  if (id === undefined || id === null) {
-    return res.status(403).json({
-      message: "Unauthorized",
-    });
-  }
-  const userId = typeof id === "number" ? id : parseInt(String(id), 10);
-  if (Number.isNaN(userId) || userId < 1) {
-    return res.status(403).json({
-      message: "Invalid user",
-    });
-  }
-
-  const body = req.body;
-  const parsedData = ZapCreateSchema.safeParse(body);
-
-  if (!parsedData.success) {
-    return res.status(411).json({
-      message: "Incorrect inputs",
-    });
-  }
-
-  const zapId = await prismaClient.$transaction(async (tx: Prisma.TransactionClient) => {
-    const zap = await tx.zap.create({
-      data: {
-        user: { connect: { id: userId } },
-        triggerId: "",
-        actions: {
-          create: parsedData.data.actions.map(
-            (
-              x: { availableActionId: string; actionMetadata: Record<string, unknown> },
-              index: number,
-            ) => ({
-              actionId: x.availableActionId,
-              sortingOrder: index,
-              Metadata: x.actionMetadata,
-            }),
-          ),
-        },
-      },
-    });
-
-    const trigger = await tx.trigger.create({
-      data: {
-        type: { connect: { id: parsedData.data.availableTriggerId } },
-        zap: { connect: { id: zap.id } },
-      },
-    });
-
-    await tx.zap.update({
-      where: {
-        id: zap.id,
-      },
-      data: {
-        triggerId: trigger.id,
-      },
-    });
-
-    return zap.id;
-  });
-  return res.json({
-    zapId,
-  });
-});
+const workflowActions = createWorkflowActionHandlers(prismaClient, config.encryptionKey);
+router.post("/", authMiddleware, workflowActions.create);
+router.put("/:zapId/actions", authMiddleware, workflowActions.update);
 
 router.get("/", authMiddleware, async (req, res) => {
   const id = req.id;
@@ -93,6 +40,7 @@ router.get("/", authMiddleware, async (req, res) => {
     },
     include: {
       actions: {
+        orderBy: { sortingOrder: "asc" },
         include: {
           type: true,
         },
@@ -109,6 +57,8 @@ router.get("/", authMiddleware, async (req, res) => {
     zaps,
   });
 });
+
+router.get("/:zapId/runs", authMiddleware, createExecutionHistoryHandler(prismaClient));
 
 router.get("/:zapId", authMiddleware, async (req, res) => {
   const id = req.id;
@@ -133,6 +83,7 @@ router.get("/:zapId", authMiddleware, async (req, res) => {
     },
     include: {
       actions: {
+        orderBy: { sortingOrder: "asc" },
         include: {
           type: true,
         },

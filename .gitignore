@@ -1,5 +1,10 @@
 node_modules
 docs/
+
+# Local supporting documentation (keep README files in Git)
+/ACTION_EXECUTION.md
+/ARCHITECTURE.md
+/TESTING.md
 dist
 .env
 .env.local
@@ -24,3 +29,4 @@ dist
 
 # Unit-test reports
 **/coverage/
+/env setup.md

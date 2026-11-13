@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { readEncryptionKey } from "./credentials.js";
 
 function required(name: string): string {
   const value = process.env[name];
@@ -33,5 +34,11 @@ function databaseUrl(): string {
   return value;
 }
 
-export const config = { databaseUrl: databaseUrl(), port: port("PORT", 3000) };
+export const config = {
+  databaseUrl: databaseUrl(),
+  port: port("PORT", 3000),
+  encryptionKey: readEncryptionKey(process.env.CREDENTIAL_ENCRYPTION_KEY),
+  githubSetupSecret: process.env.GITHUB_SECRETS,
+  githubSetupWorkflowId: process.env.GITHUB_SETUP_WORKFLOW_ID,
+};
 export const JWT_PASSWORD = required("JWT_PASSWORD");

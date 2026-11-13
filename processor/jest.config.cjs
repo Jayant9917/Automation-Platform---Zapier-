@@ -19,7 +19,7 @@ module.exports = {
     ],
   },
   moduleNameMapper: { "^(\\.{1,2}/.*)\\.js$": "$1" },
-  collectCoverageFrom: ["src/config.ts", "src/payload.ts"],
+  collectCoverageFrom: ["src/config.ts", "src/payload.ts", "src/dispatch.ts"],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "json-summary"],
   coverageThreshold: { global: { branches: 80, functions: 85, lines: 85, statements: 85 } },

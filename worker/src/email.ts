@@ -12,23 +12,17 @@ const transport = nodemailer.createTransport({
   socketTimeout: 30000,
 });
 
-export async function sendEmail(to: string, body: string): Promise<void> {
-  try {
-    if (!to || !body) {
-      throw new Error(`Invalid email or body: to=${to}, body=${body}`);
-    }
-
-    const from = config.smtp.from;
-    const info = await transport.sendMail({
-      from,
-      to,
-      subject: "Hello from workflow",
-      text: body,
-    });
-
-    console.log(`✅ Email sent to ${to}`, info.messageId ? `messageId=${info.messageId}` : "");
-  } catch (err) {
-    console.error(`❌ Failed to send email to ${to}:`, err);
-    throw err;
-  }
+export async function sendEmail(
+  to: string,
+  body: string,
+  subject = "Hello from workflow",
+): Promise<void> {
+  if (!to || !body) throw new Error("Invalid email or body");
+  // The caller classifies provider errors. Never log raw errors or message contents here.
+  await transport.sendMail({
+    from: config.smtp.from,
+    to,
+    subject,
+    text: body,
+  });
 }

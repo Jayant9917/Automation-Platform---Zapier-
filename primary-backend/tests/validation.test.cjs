@@ -38,3 +38,29 @@ test.each([
 ])("rejects malformed workflow structure %s", (input) => {
   expect(ZapCreateSchema.safeParse(input).success).toBe(false);
 });
+
+test.each([
+  { availableTriggerId: "webhook", actions: [] },
+  { availableTriggerId: "webhook", actions: [{ availableActionId: "slack", actionMetadata: {} }] },
+  {
+    availableTriggerId: "webhook",
+    actions: [{ availableActionId: "email", actionMetadata: { email: "invalid", body: "Hi" } }],
+  },
+  {
+    availableTriggerId: "webhook",
+    actions: [{ availableActionId: "email", actionMetadata: { email: "a@test.dev", body: " " } }],
+  },
+])("rejects unsupported or invalid actions %j", (value) =>
+  expect(ZapCreateSchema.safeParse(value).success).toBe(false),
+);
+test("accepts multiple email actions", () => {
+  expect(
+    ZapCreateSchema.safeParse({
+      availableTriggerId: "webhook",
+      actions: ["a", "b"].map((name) => ({
+        availableActionId: "email",
+        actionMetadata: { email: `${name}@test.dev`, body: "Hi" },
+      })),
+    }).success,
+  ).toBe(true);
+});

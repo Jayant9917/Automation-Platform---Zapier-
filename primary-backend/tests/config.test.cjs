@@ -52,3 +52,10 @@ test.each([undefined, "", "   "])("requires a JWT secret", (value) => {
 test("keeps the supplied JWT secret", () => {
   expect(load().JWT_PASSWORD).toBe("unit-test-secret");
 });
+
+test("validates credential encryption keys at startup", () => {
+  process.env.CREDENTIAL_ENCRYPTION_KEY = "invalid";
+  expect(load).toThrow(/CREDENTIAL_ENCRYPTION_KEY/);
+  process.env.CREDENTIAL_ENCRYPTION_KEY = "ab".repeat(32);
+  expect(load().config.encryptionKey).toBe(process.env.CREDENTIAL_ENCRYPTION_KEY);
+});

@@ -6,7 +6,7 @@ A Zapier-like automation platform that allows users to create automated workflow
 
 ## Unit testing and CI
 
-Jest unit tests and GitHub Actions CI are configured across all five modules. Tests run in network-isolated Docker containers with external dependencies mocked. See [TESTING.md](TESTING.md) for commands, coverage scope, and CI behavior. Integration/end-to-end testing and deployment are outside the current scope.
+Jest unit tests and GitHub Actions CI are configured across all five modules. Tests run in network-isolated Docker containers with external dependencies mocked. Supporting testing notes are maintained locally and are not published in this repository. Integration/end-to-end testing and deployment are outside the current scope.
 
 ## Docker Desktop development (current workflow)
 
@@ -253,7 +253,7 @@ See `.env.example` for a complete template with descriptions.
 
 ## 🏛️ Architecture
 
-This project follows a microservices architecture with event-driven communication. See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation.
+This project follows a microservices architecture with event-driven communication. Detailed supporting architecture notes are maintained locally.
 
 ## 🧪 Testing
 
