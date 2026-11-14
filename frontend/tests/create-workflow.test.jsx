@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import axios from "axios";
+import { ToastContainer } from "../components/ui/toast";
 import Page from "../app/(dashboard)/zap/create/page";
 const mockPush = jest.fn();
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
@@ -71,7 +72,12 @@ test("collects GitHub repository and secret inside the trigger popup before publ
 test("failed publishing preserves action configuration for correction", async () => {
   axios.post.mockRejectedValue({ response: { data: { message: "Choose your own connection" } } });
   await act(async () => {
-    render(<Page />);
+    render(
+      <>
+        <ToastContainer />
+        <Page />
+      </>,
+    );
   });
   await chooseTrigger();
   emailAction();
@@ -107,3 +113,17 @@ test.each(["github.issue_closed", "github.pull_request_opened"])(
     );
   },
 );
+
+test("publishes a schedule with its selected UTC timing", async () => {
+  await act(async () => {
+    render(<Page />);
+  });
+  await chooseTrigger("Schedule");
+  emailAction();
+  fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+  await waitFor(() => expect(axios.post).toHaveBeenCalled());
+  expect(axios.post.mock.calls[0][1]).toMatchObject({
+    availableTriggerId: "schedule",
+    schedule: { frequency: "every_5_minutes", hour: 9, minute: 0, enabled: true },
+  });
+});
