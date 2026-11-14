@@ -57,3 +57,24 @@ test("loads and saves an existing schedule without changing actions", async () =
     ),
   );
 });
+
+test("inserting an HTTP event field keeps its request body valid JSON", () => {
+  const onChange = jest.fn();
+  render(
+    <ActionListEditor
+      actions={[newAction("http.request", "schedule")]}
+      connections={[]}
+      onChange={onChange}
+      view="fields"
+      trigger="schedule"
+    />,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Use event data for JSON request body" }));
+  fireEvent.change(screen.getByRole("combobox", { name: /Insert event field into/ }), {
+    target: { value: "schedule.scheduledAt" },
+  });
+  expect(JSON.parse(onChange.mock.calls[0][0][0].actionMetadata.body)).toEqual({
+    message: "Hello from ActionHub",
+    schedule_scheduledAt: "{{schedule.scheduledAt}}",
+  });
+});

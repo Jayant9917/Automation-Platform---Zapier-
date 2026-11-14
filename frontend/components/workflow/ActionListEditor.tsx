@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "@/components/ui/toast";
 import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -13,6 +14,7 @@ function TemplateField({
   multiline = false,
   limit = 40000,
   fields = eventFields,
+  jsonBody = false,
 }: {
   label: string;
   id: string;
@@ -21,6 +23,7 @@ function TemplateField({
   multiline?: boolean;
   limit?: number;
   fields?: string[];
+  jsonBody?: boolean;
 }) {
   const [showFields, setShowFields] = useState(false);
   const hasFields = /\{\{[^{}]+\}\}/.test(value);
@@ -122,7 +125,23 @@ function TemplateField({
           className="max-w-full rounded-lg border border-brand-100 bg-brand-50/50 px-3 py-1.5 text-caption font-medium text-brand-700 focus:border-brand-400"
           value=""
           onChange={(e) => {
-            if (e.target.value) onChange(value + `{{${e.target.value}}}`);
+            const field = e.target.value;
+            if (!field) return;
+            if (!jsonBody) {
+              onChange(value + `{{${field}}}`);
+              return;
+            }
+            try {
+              const body = JSON.parse(value || "{}");
+              if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error();
+              let key = field.replaceAll(".", "_");
+              while (Object.hasOwn(body, key)) key += "_field";
+              onChange(JSON.stringify({ ...body, [key]: `{{${field}}}` }, null, 2));
+            } catch {
+              toast.error(
+                "Use a valid JSON object before adding a field. You can also type mappings inside quoted JSON string values.",
+              );
+            }
           }}
         >
           <option value="">Choose a field...</option>
@@ -291,6 +310,7 @@ export function ActionListEditor({
                 {text("method") !== "GET" && (
                   <TemplateField
                     fields={fields}
+                    jsonBody
                     label="JSON request body"
                     id={`${id}-http-body`}
                     value={text("body")}
@@ -300,9 +320,9 @@ export function ActionListEditor({
                   />
                 )}
                 <p className="text-body-sm text-neutral-500">
-                  Use valid JSON. Insert event fields inside quoted string values. Responses are
-                  checked for success but are not passed to other actions. Redirects and private
-                  network destinations are blocked.
+                  Use valid JSON. Choosing an event field adds a JSON property; you can rename its
+                  key. Responses are checked for success but are not passed to other actions.
+                  Redirects and private network destinations are blocked.
                 </p>
               </>
             )}
