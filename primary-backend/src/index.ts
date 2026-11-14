@@ -1,3 +1,4 @@
+import { createRunHistoryHandlers } from "./run-history.js";
 import { prismaClient } from "./db/index.js";
 import { Router } from "express";
 import { authMiddleware } from "./middleware.js";
@@ -33,6 +34,12 @@ connectionRouter.post("/", connections.save);
 connectionRouter.put("/:connectionId", connections.save);
 connectionRouter.delete("/:connectionId", connections.revoke);
 app.use("/api/v1/connections", connectionRouter);
+const runHistory = createRunHistoryHandlers(prismaClient);
+const runRouter = Router();
+runRouter.use(authMiddleware);
+runRouter.get("/", runHistory.list);
+runRouter.get("/:runId", runHistory.detail);
+app.use("/api/v1/runs", runRouter);
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/zap", zapRouter);

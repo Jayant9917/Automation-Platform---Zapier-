@@ -32,6 +32,7 @@ module.exports = {
     "src/types.ts",
     "src/execution-status.ts",
     "src/execution-history.ts",
+    "src/run-history.ts",
     "src/github-setup.ts",
     "src/tally-setup.ts",
   ],

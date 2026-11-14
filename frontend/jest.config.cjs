@@ -7,6 +7,8 @@ module.exports = createJestConfig({
   clearMocks: true,
   restoreMocks: true,
   collectCoverageFrom: [
+    "components/history/TaskHistory.tsx",
+    "lib/history.ts",
     "components/workflow/WorkflowCanvas.tsx",
     "components/ui/Modal.tsx",
     "components/workflow/WorkflowNode.tsx",
