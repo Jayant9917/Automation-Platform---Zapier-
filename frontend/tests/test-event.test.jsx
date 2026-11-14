@@ -144,7 +144,7 @@ test.each([
   );
 });
 test("generic action defaults use the sample fields", () => {
-  expect(newAction("email", "webhook").actionMetadata.body).toBe("{{message}}");
+  expect(newAction("email", "webhook").actionMetadata.body).toBe("Hello from ActionHub.");
   expect(newAction("discord.send_message", "webhook").actionMetadata.text).toBe(
     "{{name}}: {{message}}",
   );

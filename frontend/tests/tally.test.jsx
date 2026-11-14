@@ -76,6 +76,7 @@ test("Tally choices do not offer GitHub issue fields", async () => {
       trigger="tally.form_submitted"
     />,
   );
+  fireEvent.click(screen.getByRole("button", { name: "Use event data for Column 1" }));
   const options = screen.getAllByRole("option").map((option) => option.textContent);
   expect(options).toContain("Name");
   expect(options).not.toContain("Issue title");

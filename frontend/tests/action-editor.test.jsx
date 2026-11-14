@@ -24,6 +24,7 @@ test("users can edit dynamic email fields and insert an event mapping", () => {
   fireEvent.change(screen.getByLabelText("Recipient"), { target: { value: "user@test.dev" } });
   fireEvent.click(screen.getByRole("button", { name: "Remove Issue title from Subject" }));
   fireEvent.change(screen.getByLabelText("Subject"), { target: { value: "Issue " } });
+  fireEvent.click(screen.getByRole("button", { name: "Use event data for Subject" }));
   fireEvent.change(screen.getByLabelText("Insert event field into first-subject"), {
     target: { value: "issue.number" },
   });

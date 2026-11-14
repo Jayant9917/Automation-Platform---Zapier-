@@ -138,7 +138,7 @@ export function newAction(type = "email", trigger = "github.issue_opened"): Acti
   if (trigger === "webhook") {
     draft.actionMetadata =
       type === "email"
-        ? { email: "", subject: "Message from {{name}}", body: "{{message}}" }
+        ? { email: "", subject: "Message from ActionHub", body: "Hello from ActionHub." }
         : type === "slack.send_message" || type === "discord.send_message"
           ? { text: "{{name}}: {{message}}" }
           : {

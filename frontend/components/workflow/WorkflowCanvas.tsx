@@ -412,8 +412,8 @@ export function WorkflowCanvas({
                         className="space-y-5"
                       >
                         <p className="text-body-sm text-neutral-500">
-                          Set up this action. Use Insert event field to include data from your
-                          trigger.
+                          Enter your values normally. Use event data only if you want values from
+                          your trigger.
                         </p>
                         <ActionListEditor
                           trigger={trigger}

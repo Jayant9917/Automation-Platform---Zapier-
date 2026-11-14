@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { actionNames, eventFields, fieldLabels, newAction, providers } from "@/lib/actions";
@@ -21,64 +22,117 @@ function TemplateField({
   limit?: number;
   fields?: string[];
 }) {
+  const [showFields, setShowFields] = useState(false);
+  const hasFields = /\{\{[^{}]+\}\}/.test(value);
   return (
     <div className="space-y-2">
       <label htmlFor={id} className="block text-body-sm font-medium">
         {label}
       </label>
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-white p-3 focus-within:border-brand-400">
-        {value.split(/(\{\{[^{}]+\}\})/g).map((part, index, parts) => {
-          const match = /^\{\{\s*([^{}]+?)\s*\}\}$/.exec(part);
-          if (match)
-            return (
-              <span
-                key={index}
-                className="inline-flex items-center gap-2 rounded-lg bg-brand-50 px-2.5 py-1 text-body-sm font-medium text-brand-700"
-              >
-                {fieldLabels[match[1]] ?? match[1]}
-                <button
-                  type="button"
-                  aria-label={`Remove ${fieldLabels[match[1]] ?? match[1]} from ${label}`}
-                  onClick={() => onChange(parts.filter((_, i) => i !== index).join(""))}
-                  className="rounded px-1 hover:bg-brand-100"
+      {hasFields ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-white p-3 focus-within:border-brand-400">
+          {value.split(/(\{\{[^{}]+\}\})/g).map((part, index, parts) => {
+            const match = /^\{\{\s*([^{}]+?)\s*\}\}$/.exec(part);
+            if (match)
+              return (
+                <span
+                  key={index}
+                  className="inline-flex items-center gap-2 rounded-lg bg-brand-50 px-2.5 py-1 text-body-sm font-medium text-brand-700"
                 >
-                  ×
-                </button>
-              </span>
+                  {fieldLabels[match[1]] ?? match[1]}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${fieldLabels[match[1]] ?? match[1]} from ${label}`}
+                    onClick={() => onChange(parts.filter((_, i) => i !== index).join(""))}
+                    className="rounded px-1 hover:bg-brand-100"
+                  >
+                    ×
+                  </button>
+                </span>
+              );
+            const props = {
+              id: index === 0 ? id : undefined,
+              "aria-label": index === 0 ? label : `Text after field ${index} in ${label}`,
+              value: part,
+              maxLength: Math.max(0, limit - value.length + part.length),
+              placeholder: parts.length === 1 ? "Type text or choose a field below" : "Add text...",
+              onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                onChange(
+                  parts.map((text, i) => (i === index ? event.target.value : text)).join(""),
+                ),
+              className:
+                "min-w-[100px] flex-1 border-0 bg-transparent p-1 text-body outline-none focus:ring-0",
+            };
+            return multiline ? (
+              <textarea key={index} {...props} rows={2} />
+            ) : (
+              <input key={index} {...props} />
             );
-          const props = {
-            id: index === 0 ? id : undefined,
-            "aria-label": index === 0 ? label : `Text after field ${index} in ${label}`,
-            value: part,
-            maxLength: Math.max(0, limit - value.length + part.length),
-            placeholder: parts.length === 1 ? "Type text or choose a field below" : "Add text...",
-            onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-              onChange(parts.map((text, i) => (i === index ? event.target.value : text)).join("")),
-            className:
-              "min-w-[100px] flex-1 border-0 bg-transparent p-1 text-body outline-none focus:ring-0",
-          };
-          return multiline ? (
-            <textarea key={index} {...props} rows={2} />
-          ) : (
-            <input key={index} {...props} />
-          );
-        })}
-      </div>{" "}
-      <select
-        aria-label={`Insert event field into ${id}`}
-        className="max-w-full rounded-lg border border-brand-100 bg-brand-50/50 px-3 py-1.5 text-caption font-medium text-brand-700 focus:border-brand-400"
-        value=""
-        onChange={(e) => {
-          if (e.target.value) onChange(value + `{{${e.target.value}}}`);
-        }}
-      >
-        <option value="">Choose a field...</option>
-        {fields.map((field) => (
-          <option key={field} value={field}>
-            {fieldLabels[field] ?? field}
-          </option>
-        ))}
-      </select>
+          })}
+        </div>
+      ) : multiline ? (
+        <textarea
+          id={id}
+          value={value}
+          required
+          maxLength={limit}
+          onChange={(event) => onChange(event.target.value)}
+          rows={4}
+          placeholder={`Type your ${label.toLowerCase()}...`}
+          className="block w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-body outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+        />
+      ) : (
+        <input
+          id={id}
+          value={value}
+          required
+          maxLength={limit}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={`Type your ${label.toLowerCase()}...`}
+          className="block w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-body outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+        />
+      )}
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          aria-label={`Use event data for ${label}`}
+          aria-expanded={showFields}
+          onClick={() => setShowFields(!showFields)}
+          className="text-caption font-medium text-brand-600 hover:underline"
+        >
+          {showFields ? "Hide event data" : "Use event data (optional)"}
+        </button>
+        {hasFields && (
+          <button
+            type="button"
+            aria-label={`Write plain text for ${label}`}
+            onClick={() => {
+              onChange(value.replace(/\{\{[^{}]+\}\}/g, ""));
+              setShowFields(false);
+            }}
+            className="text-caption font-medium text-neutral-500 hover:text-neutral-800 hover:underline"
+          >
+            Write my own text
+          </button>
+        )}
+      </div>
+      {showFields && (
+        <select
+          aria-label={`Insert event field into ${id}`}
+          className="max-w-full rounded-lg border border-brand-100 bg-brand-50/50 px-3 py-1.5 text-caption font-medium text-brand-700 focus:border-brand-400"
+          value=""
+          onChange={(e) => {
+            if (e.target.value) onChange(value + `{{${e.target.value}}}`);
+          }}
+        >
+          <option value="">Choose a field...</option>
+          {fields.map((field) => (
+            <option key={field} value={field}>
+              {fieldLabels[field] ?? field}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   );
 }

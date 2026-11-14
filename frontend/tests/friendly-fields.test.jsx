@@ -21,6 +21,7 @@ test("shows friendly chips while preserving stored mappings and mixed text", () 
   expect(screen.getByLabelText("Column 1")).toHaveValue("");
   fireEvent.change(screen.getByLabelText("Column 1"), { target: { value: "Issue: " } });
   expect(JSON.parse(screen.getByTestId("saved").textContent)[0]).toBe("Issue: {{issue.title}}");
+  fireEvent.click(screen.getByRole("button", { name: "Use event data for Column 1" }));
   fireEvent.change(screen.getByLabelText("Insert event field into sheet-column-0"), {
     target: { value: "issue.number" },
   });
