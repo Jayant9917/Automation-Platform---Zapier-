@@ -1,3 +1,4 @@
+import { createTestEventHandler } from "../test-event.js";
 import { createTallySetupHandlers } from "../tally-setup.js";
 import { Router } from "express";
 import { authMiddleware } from "../middleware.js";
@@ -8,6 +9,11 @@ import { createGitHubSetupHandlers } from "../github-setup.js";
 import { createExecutionHistoryHandler } from "../execution-history.js";
 
 const router = Router();
+router.post(
+  "/:zapId/test-event",
+  authMiddleware,
+  createTestEventHandler(prismaClient, config.testEventsEnabled),
+);
 const tallySetup = createTallySetupHandlers(prismaClient, config.encryptionKey);
 router.get("/:zapId/tally-trigger", authMiddleware, tallySetup.get);
 router.put("/:zapId/tally-trigger", authMiddleware, tallySetup.save);
@@ -97,6 +103,7 @@ router.get("/:zapId", authMiddleware, async (req, res) => {
   });
 
   return res.json({
+    testEventsEnabled: config.testEventsEnabled,
     zap,
   });
 });

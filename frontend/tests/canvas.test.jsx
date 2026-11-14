@@ -61,9 +61,7 @@ test("the action connects its account in the same overlay and retains mapped fie
   });
   fireEvent.click(screen.getByRole("button", { name: "Done" }));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  expect(drafts()[0].actionMetadata.text).toBe(
-    "{{issue.title}}{{repository.full_name}}: {{issue.title}}\n{{issue.html_url}}",
-  );
+  expect(drafts()[0].actionMetadata.text).toBe("{{issue.title}}{{name}}: {{message}}");
 });
 test("a required account is requested before finishing an action", async () => {
   await setup();

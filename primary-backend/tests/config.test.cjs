@@ -59,3 +59,18 @@ test("validates credential encryption keys at startup", () => {
   process.env.CREDENTIAL_ENCRYPTION_KEY = "ab".repeat(32);
   expect(load().config.encryptionKey).toBe(process.env.CREDENTIAL_ENCRYPTION_KEY);
 });
+
+test.each([undefined, "production", "staging", "Development", ""])(
+  "test button is disabled for APP_ENV %s",
+  (value) => {
+    if (value !== undefined) process.env.APP_ENV = value;
+    expect(load().config.testEventsEnabled).toBe(false);
+  },
+);
+test("development explicitly enables test events unless Node is production", () => {
+  process.env.APP_ENV = "development";
+  expect(load().config.testEventsEnabled).toBe(true);
+  jest.resetModules();
+  process.env.NODE_ENV = "production";
+  expect(load().config.testEventsEnabled).toBe(false);
+});

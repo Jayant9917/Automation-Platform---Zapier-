@@ -104,6 +104,7 @@ services:
     environment:
       DATABASE_URL: postgresql://actionhub:actionhub_dev@postgres:5432/actionhub
       PORT: 3000
+      APP_ENV: ${APP_ENV:-production}
       JWT_PASSWORD: ${JWT_PASSWORD:?Set JWT_PASSWORD in .env.docker}
       CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?Set CREDENTIAL_ENCRYPTION_KEY in .env.docker}
       GITHUB_SECRETS: ${GITHUB_SECRETS:-}

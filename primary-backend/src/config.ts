@@ -35,6 +35,7 @@ function databaseUrl(): string {
 }
 
 export const config = {
+  testEventsEnabled: process.env.APP_ENV === "development" && process.env.NODE_ENV !== "production",
   databaseUrl: databaseUrl(),
   port: port("PORT", 3000),
   encryptionKey: readEncryptionKey(process.env.CREDENTIAL_ENCRYPTION_KEY),

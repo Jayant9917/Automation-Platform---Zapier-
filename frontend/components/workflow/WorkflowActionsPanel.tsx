@@ -7,6 +7,7 @@ import type { ActionDraft } from "@/lib/actions";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { TallyTriggerSetup } from "./TallyTriggerSetup";
 import { GitHubTriggerSetup } from "./GitHubTriggerSetup";
+import { TestEventPanel } from "./TestEventPanel";
 import { Button } from "@/components/ui/Button";
 export function WorkflowActionsPanel({
   workflowId,
@@ -21,6 +22,7 @@ export function WorkflowActionsPanel({
   const [persistedTrigger, setPersistedTrigger] = useState("webhook");
   const [owner, setOwner] = useState("");
   const [origin, setOrigin] = useState("");
+  const [testEventsEnabled, setTestEventsEnabled] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -53,6 +55,7 @@ export function WorkflowActionsPanel({
       setPersistedTrigger(savedTrigger);
       setOwner(String(data.zap.userId));
       setRevision(data.zap.actionsRevision);
+      setTestEventsEnabled(data.testEventsEnabled === true);
       setLoaded(true);
       setError("");
     } catch {
@@ -142,6 +145,9 @@ export function WorkflowActionsPanel({
               <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 break-all font-mono text-body-sm">
                 {origin}/hooks/catch/{owner}/{workflowId}
               </div>
+              {testEventsEnabled && persistedTrigger === "webhook" && (
+                <TestEventPanel workflowId={workflowId} disabled={saving} />
+              )}
               <div className="flex justify-end border-t border-neutral-200 pt-4">
                 <Button onClick={done}>Done</Button>
               </div>

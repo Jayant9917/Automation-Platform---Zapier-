@@ -96,8 +96,10 @@ export function ActionListEditor({
   onChange: (value: ActionDraft[]) => void;
 }) {
   const fields = eventFields.filter((field) => {
-    if (!trigger || trigger === "webhook") return true;
+    if (!trigger) return true;
+    if (trigger === "webhook") return !field.includes(".") || field.startsWith("execution.");
     if (field.startsWith("execution.")) return true;
+    if (["name", "email", "message"].includes(field)) return false;
     if (trigger === "tally.form_submitted") return field.startsWith("tally.");
     if (field.startsWith("tally.")) return false;
     return trigger === "github.pull_request_opened"

@@ -18,6 +18,9 @@ export const providers: Record<string, string> = {
   "google_sheets.append_row": "google.service_account",
 };
 export const eventFields = [
+  "name",
+  "email",
+  "message",
   "tally.name",
   "tally.email",
   "tally.message",
@@ -41,6 +44,9 @@ export const eventFields = [
   "execution.actionId",
 ];
 export const fieldLabels: Record<string, string> = {
+  name: "Name",
+  email: "Email",
+  message: "Message",
   "tally.name": "Name",
   "tally.email": "Email",
   "tally.message": "Message",
@@ -127,6 +133,18 @@ export function newAction(type = "email", trigger = "github.issue_opened"): Acti
                 "{{tally.formName}}",
                 "{{tally.submissionId}}",
               ],
+            };
+  }
+  if (trigger === "webhook") {
+    draft.actionMetadata =
+      type === "email"
+        ? { email: "", subject: "Message from {{name}}", body: "{{message}}" }
+        : type === "slack.send_message" || type === "discord.send_message"
+          ? { text: "{{name}}: {{message}}" }
+          : {
+              spreadsheetId: "",
+              range: "Sheet1!A:C",
+              values: ["{{name}}", "{{email}}", "{{message}}"],
             };
   }
   return draft;
