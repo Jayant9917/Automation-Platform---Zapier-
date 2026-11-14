@@ -89,7 +89,6 @@ type Props = {
   onSave: () => void;
   saving: boolean;
   saveLabel: string;
-  error?: string;
   message?: string;
   fixedTrigger?: boolean;
   onTriggerClosed?: () => void;
@@ -104,7 +103,6 @@ export function WorkflowCanvas({
   onSave,
   saving,
   saveLabel,
-  error,
   message,
   fixedTrigger = false,
   onTriggerClosed,
@@ -174,11 +172,6 @@ export function WorkflowCanvas({
             {saving ? "Saving..." : saveLabel}
           </Button>
         </div>
-        {error && (
-          <p role="alert" className="container-content mt-2 text-body-sm text-red-600">
-            {error}
-          </p>
-        )}
         {message && (
           <p role="status" className="container-content mt-2 text-body-sm text-green-700">
             {message}

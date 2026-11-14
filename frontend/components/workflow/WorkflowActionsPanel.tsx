@@ -113,7 +113,6 @@ export function WorkflowActionsPanel({
         onSave={() => void save()}
         saving={saving}
         saveLabel="Save changes"
-        error={error}
         message={message}
         fixedTrigger={
           persistedTrigger.startsWith("github.") || persistedTrigger === "tally.form_submitted"

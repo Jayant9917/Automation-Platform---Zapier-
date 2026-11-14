@@ -54,7 +54,6 @@ export default function CreateAutomationPage() {
       onSave={() => void publish()}
       saving={saving}
       saveLabel="Publish"
-      error={error}
       renderTriggerSettings={(done) =>
         trigger === "tally.form_submitted" ? (
           <form

@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import axios from "axios";
+import { ToastContainer } from "../components/ui/toast";
 import { WorkflowActionsPanel } from "../components/workflow/WorkflowActionsPanel";
 jest.mock("axios", () => ({ get: jest.fn(), put: jest.fn(), post: jest.fn(), delete: jest.fn() }));
 const action = {
@@ -63,8 +64,13 @@ test("edits an existing action in the popup and saves stable IDs with its revisi
   );
   expect(saved).toHaveBeenCalled();
 });
-test("a stale save preserves drafts until the user explicitly reloads", async () => {
-  render(<WorkflowActionsPanel workflowId="workflow" />);
+test("a stale save shows only a toast and preserves drafts until explicitly reloaded", async () => {
+  render(
+    <>
+      <ToastContainer />
+      <WorkflowActionsPanel workflowId="workflow" />
+    </>,
+  );
   await openEmail();
   fireEvent.change(screen.getByLabelText("Recipient"), { target: { value: "unsaved@test.dev" } });
   fireEvent.click(screen.getByRole("button", { name: "Done" }));
@@ -73,6 +79,7 @@ test("a stale save preserves drafts until the user explicitly reloads", async ()
   });
   fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("Reload before saving");
+  expect(screen.getAllByRole("alert")).toHaveLength(1);
   await openEmail();
   expect(screen.getByLabelText("Recipient")).toHaveValue("unsaved@test.dev");
   fireEvent.keyDown(document, { key: "Escape" });
