@@ -105,7 +105,72 @@ test("the trigger opens its own overlay and supports upgrading a generic webhook
   fireEvent.click(screen.getByRole("button", { name: "Continue" }));
   expect(await screen.findByLabelText("Repository")).toHaveValue("owner/repo");
   fireEvent.click(screen.getByRole("button", { name: "Save GitHub trigger" }));
-  await screen.findByRole("status");
+  await screen.findByText(/^GitHub trigger saved\. In GitHub/);
   fireEvent.click(screen.getByRole("button", { name: "Done" }));
   expect(screen.getByRole("button", { name: /1 trigger GitHub/i })).toBeInTheDocument();
+});
+
+function mockSavedGitHub() {
+  axios.get.mockImplementation((url) =>
+    Promise.resolve({
+      data: url.includes("/connections")
+        ? { connections: [] }
+        : url.includes("github-trigger")
+          ? {
+              configured: true,
+              repository: "owner/repo",
+              enabled: true,
+              setupSecretAvailable: false,
+              webhookPath: "/hooks/github/workflow",
+            }
+          : {
+              zap: {
+                userId: 2,
+                trigger: { type: { id: "github.issue_opened" } },
+                actions: [action],
+                actionsRevision: 0,
+              },
+            },
+    }),
+  );
+}
+test.each(["github.issue_closed", "github.pull_request_opened"])(
+  "changes the saved GitHub event to %s without replacing credentials",
+  async (type) => {
+    mockSavedGitHub();
+    render(<WorkflowActionsPanel workflowId="workflow" />);
+    fireEvent.click(await screen.findByRole("button", { name: /1 trigger GitHub/i }));
+    expect(screen.getByLabelText("GitHub event")).toBeEnabled();
+    fireEvent.change(screen.getByLabelText("GitHub event"), { target: { value: type } });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByLabelText("Repository")).toHaveValue("owner/repo");
+    expect(screen.getByLabelText("GitHub webhook secret")).toHaveValue("");
+    expect(screen.getByRole("note")).toHaveTextContent("not saved yet");
+    fireEvent.click(screen.getByRole("button", { name: "Save GitHub trigger" }));
+    await waitFor(() =>
+      expect(axios.put).toHaveBeenCalledWith(
+        "/api/v1/zap/workflow/github-trigger",
+        { repository: "owner/repo", enabled: true, triggerType: type },
+        expect.any(Object),
+      ),
+    );
+    await waitFor(() => expect(screen.queryByRole("note")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+    expect(screen.getByRole("button", { name: /1 trigger GitHub/i })).toHaveTextContent(
+      type === "github.issue_closed" ? "Issue closed" : "Pull request opened",
+    );
+    expect(screen.getByRole("button", { name: /2 action Email/i })).toBeInTheDocument();
+  },
+);
+test("closing an unsaved GitHub event change restores the saved event", async () => {
+  mockSavedGitHub();
+  render(<WorkflowActionsPanel workflowId="workflow" />);
+  fireEvent.click(await screen.findByRole("button", { name: /1 trigger GitHub/i }));
+  fireEvent.change(screen.getByLabelText("GitHub event"), {
+    target: { value: "github.issue_closed" },
+  });
+  fireEvent.keyDown(document, { key: "Escape" });
+  fireEvent.click(screen.getByRole("button", { name: /1 trigger GitHub/i }));
+  expect(screen.getByLabelText("GitHub event")).toHaveValue("github.issue_opened");
+  expect(axios.put).not.toHaveBeenCalled();
 });

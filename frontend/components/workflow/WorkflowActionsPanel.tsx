@@ -121,11 +121,27 @@ export function WorkflowActionsPanel({
             <TallyTriggerSetup workflowId={workflowId} />
           ) : trigger.startsWith("github.") ? (
             <div className="space-y-5">
+              {trigger !== persistedTrigger && (
+                <p
+                  role="note"
+                  className="rounded-xl border border-brand-100 bg-brand-50 p-3 text-body-sm text-neutral-700"
+                >
+                  This event change is not saved yet. Click Save GitHub trigger below to apply it.
+                  Your actions and webhook URL stay the same.
+                </p>
+              )}
+              {trigger === "github.pull_request_opened" && (
+                <p className="text-body-sm text-neutral-500">
+                  For pull requests, use Pull request fields in your actions instead of Issue
+                  fields. Existing messages and mappings are kept.
+                </p>
+              )}
               <GitHubTriggerSetup
                 compact
                 triggerType={trigger}
                 workflowId={workflowId}
                 onSaved={() => {
+                  setMessage("GitHub trigger saved. Changes apply to future events.");
                   setPersistedTrigger(trigger);
                   setTrigger(trigger);
                   onSaved?.();

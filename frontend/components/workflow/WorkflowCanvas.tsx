@@ -351,7 +351,6 @@ export function WorkflowCanvas({
                       aria-label="GitHub event"
                       value={trigger}
                       className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3"
-                      disabled={fixedTrigger}
                       onChange={(e) => onTriggerChange(e.target.value)}
                     >
                       {githubEvents.map((event) => (
