@@ -1,4 +1,5 @@
 "use client";
+import { useToastFeedback } from "@/components/ui/toast";
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "@/app/config";
@@ -44,6 +45,7 @@ export function ConnectionManager({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  useToastFeedback(error || loadError, message);
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");

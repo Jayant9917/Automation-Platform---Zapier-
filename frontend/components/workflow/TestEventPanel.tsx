@@ -1,4 +1,5 @@
 "use client";
+import { useToastFeedback } from "@/components/ui/toast";
 import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
@@ -31,6 +32,10 @@ export function TestEventPanel({
   const [sending, setSending] = useState(false),
     [error, setError] = useState(""),
     [sent, setSent] = useState(false);
+  useToastFeedback(
+    error,
+    sent ? "Test event accepted. Check Task history for action results." : "",
+  );
   function sample() {
     if (advanced) {
       const value = JSON.parse(json);

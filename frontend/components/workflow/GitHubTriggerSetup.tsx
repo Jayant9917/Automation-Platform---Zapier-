@@ -1,4 +1,5 @@
 "use client";
+import { useToastFeedback } from "@/components/ui/toast";
 
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -40,6 +41,7 @@ export function GitHubTriggerSetup({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  useToastFeedback(error, message);
   const url = `${BACKEND_URL}/api/v1/zap/${encodeURIComponent(workflowId)}/github-trigger`;
 
   useEffect(() => {

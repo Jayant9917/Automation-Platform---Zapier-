@@ -3,6 +3,7 @@ import { credentialContext, encryptSecret } from "./credentials.js";
 import type { Request, Response } from "express";
 import type { Prisma, PrismaClient } from "./generated/prisma-new/client.js";
 import { z } from "zod";
+import { validationFeedback } from "./validation-feedback.js";
 import { ZapCreateSchema } from "./types.js";
 import { ActionsSchema, actionProviders } from "./action-config.js";
 import type { ActionInput } from "./action-config.js";
@@ -20,14 +21,18 @@ async function checkConnections(
   actions: ActionInput[],
   ownerId: number,
 ) {
-  for (const action of actions) {
+  for (const [index, action] of actions.entries()) {
     const provider = actionProviders[action.availableActionId];
     if (!provider) continue;
     const connection = await tx.credential.findFirst({
       where: { id: action.credentialId!, ownerId, provider, revokedAt: null },
       select: { id: true },
     });
-    if (!connection) throw new InputError(403, "Choose your own active connection for each action");
+    if (!connection)
+      throw new InputError(
+        403,
+        `Action ${index + 1}: choose your own active connection in Setup. The selected connection is unavailable.`,
+      );
   }
 }
 const actionData = (action: ActionInput, index: number) => ({
@@ -51,10 +56,11 @@ export function createWorkflowActionHandlers(
       if (!Number.isSafeInteger(userId) || userId < 1)
         return res.status(403).json({ message: "Unauthorized" });
       const parsed = ZapCreateSchema.safeParse(req.body);
-      if (!parsed.success || parsed.data.actions.some((action) => action.id))
+      if (!parsed.success) return res.status(400).json(validationFeedback(parsed.error, req.body));
+      if (parsed.data.actions.some((action) => action.id))
         return res
           .status(400)
-          .json({ message: "Check trigger, action fields, templates, and connections" });
+          .json({ message: "New actions cannot reuse IDs from another workflow." });
       if (
         parsed.data.github &&
         (!parsed.data.availableTriggerId.startsWith("github.") || !parsed.data.github.secret)
@@ -139,10 +145,7 @@ export function createWorkflowActionHandlers(
       if (!Number.isSafeInteger(userId) || userId < 1)
         return res.status(403).json({ message: "Unauthorized" });
       const parsed = updateSchema.safeParse(req.body);
-      if (!parsed.success)
-        return res
-          .status(400)
-          .json({ message: "Check action fields, templates, connections, and revision" });
+      if (!parsed.success) return res.status(400).json(validationFeedback(parsed.error, req.body));
       const ids = parsed.data.actions.flatMap((action) => (action.id ? [action.id] : []));
       if (new Set(ids).size !== ids.length)
         return res.status(400).json({ message: "Duplicate action IDs" });

@@ -164,6 +164,15 @@ export function apiOptions() {
   };
 }
 export function apiMessage(error: unknown, fallback: string): string {
+  const failure = error as { code?: string; response?: { status?: number } } | null;
+  if (failure?.code === "ECONNABORTED" || failure?.code === "ETIMEDOUT")
+    return "The request timed out. Check whether your changes were saved before trying again.";
+  if (failure?.code === "ERR_NETWORK")
+    return "Cannot reach ActionHub. Check your connection and that Docker is running, then try again.";
+  if (failure?.response?.status === 401)
+    return "Your login has expired. Sign in again before saving.";
+  if ((failure?.response?.status ?? 0) >= 500)
+    return "ActionHub is temporarily unavailable. Your changes could not be confirmed. Please try again shortly.";
   const data = (error as { response?: { data?: { message?: unknown; error?: unknown } } } | null)
     ?.response?.data;
   const message = data?.message ?? data?.error;

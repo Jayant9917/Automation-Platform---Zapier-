@@ -1,4 +1,5 @@
 "use client";
+import { useToastFeedback } from "@/components/ui/toast";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "@/app/config";
@@ -85,6 +86,7 @@ export function TallyTriggerSetup({ workflowId }: { workflowId: string }) {
       active = false;
     };
   }, [url]);
+  useToastFeedback(error, message);
   async function save(event: React.FormEvent) {
     event.preventDefault();
     setSaving(true);

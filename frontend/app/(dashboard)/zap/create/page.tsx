@@ -1,4 +1,5 @@
 "use client";
+import { toast, useToastFeedback } from "@/components/ui/toast";
 import { TallyFields } from "@/components/workflow/TallyTriggerSetup";
 
 import { useState } from "react";
@@ -18,6 +19,7 @@ export default function CreateAutomationPage() {
   const [tally, setTally] = useState({ formId: "", secret: "", enabled: true });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  useToastFeedback(error);
   async function publish() {
     setError("");
     setSaving(true);
@@ -34,6 +36,7 @@ export default function CreateAutomationPage() {
       );
       setTally({ formId: "", secret: "", enabled: true });
       setGithub({ repository: "", secret: "", enabled: true });
+      toast.success("Automation published. It is ready to receive events.");
       router.push(`/zap/${data.zapId}`);
     } catch (failure) {
       setError(apiMessage(failure, "Could not create automation."));

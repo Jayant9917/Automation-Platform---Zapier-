@@ -1,4 +1,5 @@
 "use client";
+import { toast, useToastFeedback } from "@/components/ui/toast";
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "@/app/config";
@@ -27,6 +28,7 @@ export function WorkflowActionsPanel({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  useToastFeedback(error);
   const load = useCallback(async () => {
     try {
       const { data } = await axios.get(
@@ -79,6 +81,7 @@ export function WorkflowActionsPanel({
       setRevision(data.revision);
       await load();
       setMessage("Actions saved. Changes apply to future events.");
+      toast.success("Actions saved. Changes apply to future events.");
       onSaved?.();
     } catch (failure) {
       setError(apiMessage(failure, "Could not save actions."));
