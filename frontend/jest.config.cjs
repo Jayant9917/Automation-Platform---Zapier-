@@ -15,6 +15,7 @@ module.exports = createJestConfig({
     "components/ui/Modal.tsx",
     "components/workflow/WorkflowNode.tsx",
     "lib/actions.ts",
+    "components/workflow/ScheduleSetup.tsx",
     "components/workflow/ActionListEditor.tsx",
     "components/workflow/ConnectionManager.tsx",
     "components/workflow/WorkflowActionsPanel.tsx",

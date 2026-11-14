@@ -18,6 +18,7 @@ model User {
 }
 
 model Zap {
+  scheduleTrigger ScheduleTrigger?
   deletedAt DateTime?
   tallyTrigger TallyTrigger?
   tallyDeliveries TallyDelivery[]
@@ -186,4 +187,16 @@ model TallyDelivery {
   workflow Zap @relation(fields: [workflowId], references: [id], onDelete: Cascade)
   zapRun ZapRun @relation(fields: [zapRunId], references: [id], onDelete: Cascade)
   @@unique([workflowId, deliveryId])
+}
+
+// One durable timer per workflow. Updating nextRunAt is also the dispatch claim.
+model ScheduleTrigger {
+  workflowId String @id
+  frequency String
+  hour Int @default(9)
+  minute Int @default(0)
+  enabled Boolean @default(true)
+  nextRunAt DateTime
+  workflow Zap @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  @@index([enabled, nextRunAt])
 }

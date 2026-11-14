@@ -7,17 +7,23 @@ export type ActionDraft = {
   actionMetadata: Record<string, unknown>;
 };
 export const actionNames: Record<string, string> = {
+  "http.request": "HTTP request",
   "discord.send_message": "Discord message",
   email: "Email",
   "slack.send_message": "Slack message",
   "google_sheets.append_row": "Google Sheets row",
 };
 export const providers: Record<string, string> = {
+  "http.request": "http.headers",
   "discord.send_message": "discord.webhook",
   "slack.send_message": "slack.webhook",
   "google_sheets.append_row": "google.service_account",
 };
 export const eventFields = [
+  "schedule.scheduledAt",
+  "schedule.firedAt",
+  "schedule.frequency",
+  "schedule.timezone",
   "name",
   "email",
   "message",
@@ -44,6 +50,10 @@ export const eventFields = [
   "execution.actionId",
 ];
 export const fieldLabels: Record<string, string> = {
+  "schedule.scheduledAt": "Scheduled time",
+  "schedule.firedAt": "Started time",
+  "schedule.frequency": "Schedule frequency",
+  "schedule.timezone": "Time zone",
   name: "Name",
   email: "Email",
   message: "Message",
@@ -147,6 +157,23 @@ export function newAction(type = "email", trigger = "github.issue_opened"): Acti
               values: ["{{name}}", "{{email}}", "{{message}}"],
             };
   }
+  if (trigger === "schedule")
+    draft.actionMetadata =
+      type === "email"
+        ? {
+            email: "",
+            subject: "Scheduled notification",
+            body: "Scheduled run: {{schedule.scheduledAt}}",
+          }
+        : type === "slack.send_message" || type === "discord.send_message"
+          ? { text: "Scheduled run: {{schedule.scheduledAt}}" }
+          : {
+              spreadsheetId: "",
+              range: "Sheet1!A:B",
+              values: ["{{schedule.scheduledAt}}", "{{execution.id}}"],
+            };
+  if (type === "http.request")
+    draft.actionMetadata = { method: "POST", url: "", body: '{"message":"Hello from ActionHub"}' };
   return draft;
 }
 export function actionPayload(actions: ActionDraft[]) {

@@ -15,7 +15,8 @@ export function createWebhookHandler(prisma: Pick<PrismaClient, "$transaction">)
           workflow.actions.length === 0 ||
           workflow.githubTrigger ||
           workflow.trigger?.triggerId.startsWith("github.") ||
-          workflow.trigger?.triggerId === "tally.form_submitted"
+          workflow.trigger?.triggerId === "tally.form_submitted" ||
+          workflow.trigger?.triggerId === "schedule"
         )
           return false;
         // Save every action snapshot together with the event. Future edits affect future runs only.

@@ -1,4 +1,5 @@
 import { TallySetupSchema } from "./tally-setup.js";
+import { ScheduleSchema } from "./schedule-setup.js";
 import { z } from "zod";
 import { GitHubSetupSchema } from "./github-setup.js";
 import { ActionsSchema } from "./action-config.js";
@@ -17,12 +18,14 @@ export const SigninSchema = z.object({
 export const ZapCreateSchema = z.object({
   availableTriggerId: z.enum([
     "webhook",
+    "schedule",
     "tally.form_submitted",
     "github.issue_opened",
     "github.issue_closed",
     "github.pull_request_opened",
   ]),
   actions: ActionsSchema,
+  schedule: ScheduleSchema.optional(),
   github: GitHubSetupSchema.optional(),
   tally: TallySetupSchema.optional(),
 });

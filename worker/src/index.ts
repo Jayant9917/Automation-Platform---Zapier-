@@ -1,3 +1,4 @@
+import { createHttpHandler } from "./actions/custom-http.js";
 import { createDiscordHandler } from "./actions/discord.js";
 import { config } from "./config.js";
 import { Kafka } from "kafkajs";
@@ -11,6 +12,7 @@ import { handleMessage } from "./message-handler.js";
 const prisma = new PrismaClient({ datasourceUrl: config.databaseUrl });
 const kafka = new Kafka({ clientId: "worker", brokers: config.brokers });
 const actionRegistry = {
+  "http.request": createHttpHandler(),
   email: createEmailHandler(sendEmail),
   "slack.send_message": createSlackHandler(),
   "discord.send_message": createDiscordHandler(),

@@ -1,5 +1,6 @@
 "use client";
 import { toast, useToastFeedback } from "@/components/ui/toast";
+import { ScheduleFields, initialSchedule } from "@/components/workflow/ScheduleSetup";
 import { TallyFields } from "@/components/workflow/TallyTriggerSetup";
 
 import { useState } from "react";
@@ -13,6 +14,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 export default function CreateAutomationPage() {
   const router = useRouter();
+  const [schedule, setSchedule] = useState(initialSchedule);
   const [trigger, setTrigger] = useState("");
   const [actions, setActions] = useState<ActionDraft[]>([]);
   const [github, setGithub] = useState({ repository: "", secret: "", enabled: true });
@@ -29,6 +31,7 @@ export default function CreateAutomationPage() {
         {
           availableTriggerId: trigger,
           actions: actionPayload(actions),
+          ...(trigger === "schedule" ? { schedule } : {}),
           ...(trigger === "tally.form_submitted" ? { tally } : {}),
           ...(trigger.startsWith("github.") ? { github } : {}),
         },
@@ -55,7 +58,12 @@ export default function CreateAutomationPage() {
       saving={saving}
       saveLabel="Publish"
       renderTriggerSettings={(done) =>
-        trigger === "tally.form_submitted" ? (
+        trigger === "schedule" ? (
+          <div className="space-y-5">
+            <ScheduleFields value={schedule} onChange={setSchedule} />
+            <Button onClick={done}>Done</Button>
+          </div>
+        ) : trigger === "tally.form_submitted" ? (
           <form
             className="space-y-5"
             onSubmit={(e) => {

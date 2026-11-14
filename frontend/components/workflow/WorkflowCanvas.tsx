@@ -14,6 +14,13 @@ import type { ActionDraft } from "@/lib/actions";
 
 const apps = [
   {
+    id: "http.request",
+    name: "HTTP",
+    event: "Make an API request",
+    image: "/http.svg",
+    description: "Call a public HTTPS API with a custom JSON request.",
+  },
+  {
     id: "discord.send_message",
     name: "Discord",
     event: "Send a channel message",
@@ -43,6 +50,13 @@ const apps = [
   },
 ];
 const triggers = [
+  {
+    id: "schedule",
+    name: "Schedule",
+    event: "Recurring schedule",
+    image: "/schedule.svg",
+    description: "Run every five minutes or daily at a chosen UTC time.",
+  },
   {
     id: "tally.form_submitted",
     name: "Tally",
@@ -91,6 +105,7 @@ type Props = {
   saveLabel: string;
   message?: string;
   fixedTrigger?: boolean;
+  savedWorkflow?: boolean;
   onTriggerClosed?: () => void;
   renderTriggerSettings: (done: () => void) => ReactNode;
 };
@@ -105,6 +120,7 @@ export function WorkflowCanvas({
   saveLabel,
   message,
   fixedTrigger = false,
+  savedWorkflow = false,
   onTriggerClosed,
   renderTriggerSettings,
 }: Props) {
@@ -241,7 +257,8 @@ export function WorkflowCanvas({
                 ? triggers.filter((item) =>
                     fixedTrigger
                       ? item.id === trigger
-                      : !["github.issue_closed", "github.pull_request_opened"].includes(item.id),
+                      : !(savedWorkflow && item.id === "schedule") &&
+                        !["github.issue_closed", "github.pull_request_opened"].includes(item.id),
                   )
                 : apps
               )

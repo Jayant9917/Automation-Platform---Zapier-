@@ -131,3 +131,13 @@ test("Tally workflows cannot bypass signatures through generic catch", async () 
   await createWebhookHandler(prisma)({ params: { userId: "2", zapId: "workflow" }, body: {} }, res);
   expect(res.status).toHaveBeenCalledWith(404);
 });
+
+test("a schedule cannot be fired through the generic webhook endpoint", async () => {
+  tx.zap.findFirst.mockResolvedValue({
+    actions: [{ id: "a", actionId: "email", Metadata: {} }],
+    trigger: { triggerId: "schedule" },
+  });
+  await createWebhookHandler(database)(req, res);
+  expect(res.status).toHaveBeenCalledWith(404);
+  expect(tx.zapRun.create).not.toHaveBeenCalled();
+});

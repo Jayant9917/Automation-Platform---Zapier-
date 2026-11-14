@@ -1,3 +1,4 @@
+import { parseHttpUrl } from "./http-config.js";
 import { z } from "zod";
 import { validTemplate } from "./templates.js";
 const template = (limit: number) =>
@@ -27,6 +28,40 @@ export function spreadsheetId(input: string): string {
   throw new Error("INVALID_SPREADSHEET");
 }
 export const ActionSchema = z.discriminatedUnion("availableActionId", [
+  z.object({
+    ...base,
+    availableActionId: z.literal("http.request"),
+    credentialId: z.string().uuid(),
+    actionMetadata: z
+      .object({
+        method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
+        url: z
+          .string()
+          .max(2000)
+          .refine((value) => {
+            try {
+              parseHttpUrl(value);
+              return true;
+            } catch {
+              return false;
+            }
+          }, "Use a fixed public HTTPS URL"),
+        body: z
+          .string()
+          .max(20000)
+          .default("")
+          .refine((value) => {
+            if (!value.trim()) return true;
+            try {
+              JSON.parse(value);
+              return validTemplate(value);
+            } catch {
+              return false;
+            }
+          }, "Use valid JSON with event fields inside string values"),
+      })
+      .strict(),
+  }),
   z.object({
     ...base,
     availableActionId: z.literal("discord.send_message"),
@@ -92,6 +127,7 @@ export const ActionSchema = z.discriminatedUnion("availableActionId", [
 export const ActionsSchema = z.array(ActionSchema).min(1).max(20);
 export type ActionInput = z.infer<typeof ActionSchema>;
 export const actionProviders: Record<string, string> = {
+  "http.request": "http.headers",
   "discord.send_message": "discord.webhook",
   "slack.send_message": "slack.webhook",
   "google_sheets.append_row": "google.service_account",

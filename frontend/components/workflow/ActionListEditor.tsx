@@ -151,6 +151,9 @@ export function ActionListEditor({
 }) {
   const fields = eventFields.filter((field) => {
     if (!trigger) return true;
+    if (trigger === "schedule")
+      return field.startsWith("schedule.") || field.startsWith("execution.");
+    if (field.startsWith("schedule.")) return false;
     if (trigger === "webhook") return !field.includes(".") || field.startsWith("execution.");
     if (field.startsWith("execution.")) return true;
     if (["name", "email", "message"].includes(field)) return false;
@@ -260,6 +263,48 @@ export function ActionListEditor({
                   Create a named connection below, or manage it in Settings.
                 </p>
               </div>
+            )}
+            {view !== "connection" && action.availableActionId === "http.request" && (
+              <>
+                <label className="block">
+                  HTTP method
+                  <select
+                    aria-label="HTTP method"
+                    value={text("method")}
+                    onChange={(e) => metadata("method", e.target.value)}
+                    className="block w-full rounded-xl border border-neutral-200 p-3"
+                  >
+                    {["GET", "POST", "PUT", "PATCH", "DELETE"].map((method) => (
+                      <option key={method}>{method}</option>
+                    ))}
+                  </select>
+                </label>
+                <Input
+                  id={`${id}-url`}
+                  label="HTTPS URL"
+                  required
+                  value={text("url")}
+                  maxLength={2000}
+                  onChange={(e) => metadata("url", e.target.value)}
+                  hint="Fixed public HTTPS URL. It must match your connection origin. Keep API keys in the encrypted connection, not in this URL."
+                />
+                {text("method") !== "GET" && (
+                  <TemplateField
+                    fields={fields}
+                    label="JSON request body"
+                    id={`${id}-http-body`}
+                    value={text("body")}
+                    onChange={(v) => metadata("body", v)}
+                    multiline
+                    limit={20000}
+                  />
+                )}
+                <p className="text-body-sm text-neutral-500">
+                  Use valid JSON. Insert event fields inside quoted string values. Responses are
+                  checked for success but are not passed to other actions. Redirects and private
+                  network destinations are blocked.
+                </p>
+              </>
             )}
             {view !== "connection" && action.availableActionId === "email" && (
               <>

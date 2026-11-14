@@ -1,3 +1,4 @@
+import { parseHttpConnection } from "./http-config.js";
 import { randomUUID } from "node:crypto";
 import type { Request, Response } from "express";
 import { z } from "zod";
@@ -8,7 +9,12 @@ import {
   parseDiscordConnection,
 } from "./connection-secrets.js";
 import { encryptSecret, credentialContext } from "./credentials.js";
-const providers = ["slack.webhook", "google.service_account", "discord.webhook"] as const;
+const providers = [
+  "slack.webhook",
+  "google.service_account",
+  "discord.webhook",
+  "http.headers",
+] as const;
 const schema = z.object({
   name: z.string().trim().min(1).max(80),
   provider: z.enum(providers),
@@ -17,6 +23,7 @@ const schema = z.object({
 const safeFields = { id: true, name: true, provider: true, createdAt: true } as const;
 
 export function validateConnectionSecret(provider: string, input: unknown): unknown {
+  if (provider === "http.headers") return parseHttpConnection(input);
   if (provider === "discord.webhook") return parseDiscordConnection(input);
   if (provider === "slack.webhook") return parseSlackConnection(input);
   if (provider === "google.service_account") return parseGoogleConnection(input);
@@ -59,7 +66,8 @@ export function createConnectionHandlers(
         secret = validateConnectionSecret(parsed.data.provider, parsed.data.secret);
       } catch {
         return res.status(400).json({
-          error: "Invalid Discord/Slack webhook URL or Google service-account credentials",
+          error:
+            "Invalid connection credentials. For HTTP, enter an HTTPS origin and a headers JSON object.",
         });
       }
       const id =

@@ -4,6 +4,7 @@ import { PrismaClient } from "./src/generated/prisma-new/client.js";
 const prisma = new PrismaClient();
 
 const AVAILABLE_ACTIONS = [
+  { id: "http.request", name: "HTTP request", image: "/http.svg" },
   { id: "discord.send_message", name: "Discord message", image: "/discord.svg" },
   { id: "slack.send_message", name: "Slack message", image: "/slack.png" },
   { id: "google_sheets.append_row", name: "Google Sheets row", image: "/sheets.png" },
@@ -17,6 +18,7 @@ async function main() {
     update: { name: "Webhook" },
   });
   for (const trigger of [
+    { id: "schedule", name: "Schedule", image: "/schedule.svg" },
     { id: "tally.form_submitted", name: "Tally: form submitted", image: "/tally.svg" },
     { id: "github.issue_opened", name: "GitHub: issue opened", image: "/github.svg" },
     { id: "github.issue_closed", name: "GitHub: issue closed", image: "/github.svg" },

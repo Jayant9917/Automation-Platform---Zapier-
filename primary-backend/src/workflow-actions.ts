@@ -1,3 +1,4 @@
+import { nextSchedule } from "./schedule-time.js";
 import { randomUUID } from "node:crypto";
 import { credentialContext, encryptSecret } from "./credentials.js";
 import type { Request, Response } from "express";
@@ -61,6 +62,8 @@ export function createWorkflowActionHandlers(
         return res
           .status(400)
           .json({ message: "New actions cannot reuse IDs from another workflow." });
+      if ((parsed.data.availableTriggerId === "schedule") !== !!parsed.data.schedule)
+        return res.status(400).json({ message: "Configure the schedule frequency and UTC time." });
       if (
         parsed.data.github &&
         (!parsed.data.availableTriggerId.startsWith("github.") || !parsed.data.github.secret)
@@ -129,6 +132,15 @@ export function createWorkflowActionHandlers(
                 credentialId: id,
                 formId: parsed.data.tally.formId,
                 enabled: parsed.data.tally.enabled,
+              },
+            });
+          }
+          if (parsed.data.schedule) {
+            await tx.scheduleTrigger.create({
+              data: {
+                workflowId: zap.id,
+                ...parsed.data.schedule,
+                nextRunAt: nextSchedule(parsed.data.schedule, new Date()),
               },
             });
           }

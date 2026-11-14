@@ -1,3 +1,4 @@
+import { dispatchSchedules } from "./scheduler.js";
 import { config } from "./config.js";
 import { Kafka } from "kafkajs";
 import { PrismaClient } from "./generated/prisma/client.js";
@@ -11,6 +12,7 @@ async function main() {
   await producer.connect();
   while (true) {
     try {
+      await dispatchSchedules(prisma);
       await dispatchActions(prisma, async (job) => {
         await producer.send({
           topic: config.topic,

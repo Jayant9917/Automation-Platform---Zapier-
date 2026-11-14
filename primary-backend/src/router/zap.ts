@@ -1,6 +1,7 @@
 import { createDeleteWorkflowHandler } from "../delete-workflow.js";
 import { createTestEventHandler } from "../test-event.js";
 import { createTallySetupHandlers } from "../tally-setup.js";
+import { createScheduleHandlers } from "../schedule-setup.js";
 import { Router } from "express";
 import { authMiddleware } from "../middleware.js";
 import { createWorkflowActionHandlers } from "../workflow-actions.js";
@@ -10,6 +11,9 @@ import { createGitHubSetupHandlers } from "../github-setup.js";
 import { createExecutionHistoryHandler } from "../execution-history.js";
 
 const router = Router();
+const scheduleSetup = createScheduleHandlers(prismaClient);
+router.get("/:zapId/schedule", authMiddleware, scheduleSetup.get);
+router.put("/:zapId/schedule", authMiddleware, scheduleSetup.save);
 router.delete("/:zapId", authMiddleware, createDeleteWorkflowHandler(prismaClient));
 router.post(
   "/:zapId/test-event",

@@ -28,7 +28,9 @@ test("lists only the owner's active supported connections, never secrets", async
   expect(args.where).toEqual({
     ownerId: 2,
     revokedAt: null,
-    provider: { in: ["slack.webhook", "google.service_account", "discord.webhook"] },
+    provider: {
+      in: ["slack.webhook", "google.service_account", "discord.webhook", "http.headers"],
+    },
   });
   expect(args.select.encryptedSecret).toBeUndefined();
   expect(res.json.mock.calls[0][0].connections).toHaveLength(1);
@@ -69,7 +71,9 @@ test("revokes only active supported connections owned by the caller", async () =
       id: "c",
       ownerId: 2,
       revokedAt: null,
-      provider: { in: ["slack.webhook", "google.service_account", "discord.webhook"] },
+      provider: {
+        in: ["slack.webhook", "google.service_account", "discord.webhook", "http.headers"],
+      },
     },
     data: { revokedAt: expect.any(Date) },
   });

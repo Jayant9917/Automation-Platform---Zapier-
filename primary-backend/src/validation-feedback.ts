@@ -2,11 +2,17 @@ import type { ZodError } from "zod";
 
 const actions: Record<string, string> = {
   email: "Email",
+  "http.request": "HTTP request",
   "slack.send_message": "Slack",
   "discord.send_message": "Discord",
   "google_sheets.append_row": "Google Sheets",
 };
 const fields: Record<string, string> = {
+  url: "HTTPS URL",
+  method: "HTTP method",
+  frequency: "Schedule frequency",
+  hour: "UTC hour",
+  minute: "UTC minute",
   email: "Recipient",
   subject: "Subject",
   body: "Email body",

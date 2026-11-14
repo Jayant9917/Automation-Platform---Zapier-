@@ -5,6 +5,7 @@ import axios from "axios";
 import { BACKEND_URL } from "@/app/config";
 import { apiOptions, apiMessage, actionPayload } from "@/lib/actions";
 import type { ActionDraft } from "@/lib/actions";
+import { ScheduleSetup } from "./ScheduleSetup";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { TallyTriggerSetup } from "./TallyTriggerSetup";
 import { GitHubTriggerSetup } from "./GitHubTriggerSetup";
@@ -106,6 +107,7 @@ export function WorkflowActionsPanel({
     <div>
       <WorkflowCanvas
         title="Workflow"
+        savedWorkflow
         trigger={trigger}
         actions={actions}
         onTriggerChange={setTrigger}
@@ -115,11 +117,15 @@ export function WorkflowActionsPanel({
         saveLabel="Save changes"
         message={message}
         fixedTrigger={
-          persistedTrigger.startsWith("github.") || persistedTrigger === "tally.form_submitted"
+          persistedTrigger.startsWith("github.") ||
+          persistedTrigger === "tally.form_submitted" ||
+          persistedTrigger === "schedule"
         }
         onTriggerClosed={() => setTrigger(persistedTrigger)}
         renderTriggerSettings={(done) =>
-          trigger === "tally.form_submitted" ? (
+          trigger === "schedule" ? (
+            <ScheduleSetup workflowId={workflowId} />
+          ) : trigger === "tally.form_submitted" ? (
             <TallyTriggerSetup workflowId={workflowId} />
           ) : trigger.startsWith("github.") ? (
             <div className="space-y-5">

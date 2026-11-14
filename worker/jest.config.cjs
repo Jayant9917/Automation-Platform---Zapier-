@@ -21,6 +21,7 @@ module.exports = {
   moduleNameMapper: { "^(\\.{1,2}/.*)\\.js$": "$1" },
   collectCoverageFrom: [
     "src/templates.ts",
+    "src/http-config.ts",
     "src/credentials.ts",
     "src/connection-secrets.ts",
     "src/google-token.ts",

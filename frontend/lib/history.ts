@@ -31,6 +31,12 @@ export const statusLabels: Record<string, string> = {
 export function errorExplanation(code: string | null): string {
   if (!code) return "";
   const messages: Record<string, string> = {
+    HTTP_DESTINATION_BLOCKED:
+      "This address resolves to a private or reserved network. Use a public HTTPS API.",
+    HTTP_ORIGIN_MISMATCH:
+      "The API URL must match the HTTPS origin saved in the selected HTTP connection.",
+    HTTP_REDIRECT_BLOCKED: "The API returned a redirect. Use its final HTTPS endpoint directly.",
+    HTTP_DNS_UNAVAILABLE: "The API hostname could not be resolved. A retry is scheduled.",
     WORKFLOW_DELETED: "This queued action was cancelled because its automation was deleted.",
     CONNECTION_REQUIRED:
       "Choose a connection for this action and check the application encryption settings.",
