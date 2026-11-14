@@ -1,0 +1,1 @@
+ALTER TABLE "Zap" ADD COLUMN "deletedAt" TIMESTAMP(3);

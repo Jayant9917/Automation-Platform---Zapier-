@@ -6,7 +6,7 @@ export function createWebhookHandler(prisma: Pick<PrismaClient, "$transaction">)
     try {
       const accepted = await prisma.$transaction(async (tx) => {
         const workflow = await tx.zap.findFirst({
-          where: { id: zapId, userId: Number(userId) },
+          where: { id: zapId, userId: Number(userId), deletedAt: null },
           include: { actions: true, githubTrigger: true, trigger: true },
         });
         // A GitHub workflow must never bypass signature checks through the generic endpoint.

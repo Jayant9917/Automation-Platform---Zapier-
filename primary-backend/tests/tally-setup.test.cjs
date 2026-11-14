@@ -26,7 +26,12 @@ test("saves encrypted credentials inside the owner-scoped transaction", async ()
   );
   expect(tx.zap.findFirst).toHaveBeenCalledWith(
     expect.objectContaining({
-      where: { id: "workflow", userId: 2, trigger: { triggerId: "tally.form_submitted" } },
+      where: {
+        id: "workflow",
+        userId: 2,
+        deletedAt: null,
+        trigger: { triggerId: "tally.form_submitted" },
+      },
     }),
   );
   expect(res.json).toHaveBeenCalledWith({ success: true });

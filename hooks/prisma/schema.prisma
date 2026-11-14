@@ -18,6 +18,7 @@ model User {
 }
 
 model Zap {
+  deletedAt DateTime?
   tallyTrigger TallyTrigger?
   tallyDeliveries TallyDelivery[]
   actionsRevision Int @default(0)

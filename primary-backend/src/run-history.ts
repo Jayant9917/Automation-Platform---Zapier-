@@ -3,6 +3,7 @@ import type { Prisma, PrismaClient } from "./generated/prisma-new/client.js";
 import { z } from "zod";
 import { getExecutionStatus } from "./execution-status.js";
 const statuses = [
+  "cancelled",
   "pending",
   "running",
   "succeeded",
@@ -32,7 +33,7 @@ const runSelect = {
   id: true,
   zapId: true,
   createdAt: true,
-  zap: { select: { trigger: { select: { type: { select: { name: true } } } } } },
+  zap: { select: { deletedAt: true, trigger: { select: { type: { select: { name: true } } } } } },
   actionRuns: {
     select: actionSelect,
     orderBy: [{ createdAt: "asc" as const }, { id: "asc" as const }],
@@ -44,6 +45,10 @@ export function runStatusFilter(status: string): Prisma.ZapRunWhereInput {
   const noneAttention = { actionRuns: { none: { status: "needs_attention" } } };
   const noneActive = { actionRuns: { none: { status: { in: active } } } };
   switch (status) {
+    case "cancelled":
+      return {
+        AND: [{ actionRuns: { some: {} } }, { actionRuns: { every: { status: "cancelled" } } }],
+      };
     case "pending":
       return { actionRuns: { none: {} } };
     case "needs_attention":
@@ -70,6 +75,7 @@ export function runStatusFilter(status: string): Prisma.ZapRunWhereInput {
           noneActive,
           { actionRuns: { some: {} } },
           { actionRuns: { none: { status: "succeeded" } } },
+          { actionRuns: { some: { status: { not: "cancelled" } } } },
         ],
       };
   }
@@ -114,7 +120,7 @@ export function createRunHistoryHandlers(db: Pick<PrismaClient, "zap" | "zapRun"
             take: 26,
           }),
           db.zap.findMany({
-            where: { userId },
+            where: { userId, deletedAt: null },
             select: { id: true, trigger: { select: { type: { select: { name: true } } } } },
             orderBy: { id: "asc" },
           }),

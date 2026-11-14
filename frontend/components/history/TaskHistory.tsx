@@ -44,11 +44,29 @@ export function TaskHistory() {
     [detailLoading, setDetailLoading] = useState(false);
   const listRequest = useRef(0),
     detailRequest = useRef(0);
+  const [liveError, setLiveError] = useState(false);
+  const live = useRef({ runs, detail, selected, loading, detailLoading });
+  live.current = { runs, detail, selected, loading, detailLoading };
+  const mergeRun = useCallback(
+    (updated: Run) => {
+      setRuns((current) =>
+        current.flatMap((run) =>
+          run.id !== updated.id
+            ? [run]
+            : filters.status && updated.status !== filters.status
+              ? []
+              : [updated],
+        ),
+      );
+    },
+    [filters.status],
+  );
   const load = useCallback(
     async (cursor?: string) => {
       const request = ++listRequest.current;
       setLoading(true);
       setError("");
+      setLiveError(false);
       if (!cursor) {
         setRuns([]);
         setNextCursor(null);
@@ -88,24 +106,30 @@ export function TaskHistory() {
     void load();
     return cancelList;
   }, [load, cancelList]);
-  const loadDetail = useCallback(async (id: string) => {
-    const request = ++detailRequest.current;
-    setDetailLoading(true);
-    setDetailError("");
-    setDetail(null);
-    try {
-      const { data } = await axios.get(
-        `${BACKEND_URL}/api/v1/runs/${encodeURIComponent(id)}`,
-        apiOptions(),
-      );
-      if (request === detailRequest.current) setDetail(data.run);
-    } catch (failure) {
-      if (request === detailRequest.current)
-        setDetailError(apiMessage(failure, "Could not load run details."));
-    } finally {
-      if (request === detailRequest.current) setDetailLoading(false);
-    }
-  }, []);
+  const loadDetail = useCallback(
+    async (id: string) => {
+      const request = ++detailRequest.current;
+      setDetailLoading(true);
+      setDetailError("");
+      setDetail(null);
+      try {
+        const { data } = await axios.get(
+          `${BACKEND_URL}/api/v1/runs/${encodeURIComponent(id)}`,
+          apiOptions(),
+        );
+        if (request === detailRequest.current) {
+          setDetail(data.run);
+          mergeRun(data.run);
+        }
+      } catch (failure) {
+        if (request === detailRequest.current)
+          setDetailError(apiMessage(failure, "Could not load run details."));
+      } finally {
+        if (request === detailRequest.current) setDetailLoading(false);
+      }
+    },
+    [mergeRun],
+  );
   const cancelDetail = useCallback(() => {
     detailRequest.current++;
   }, []);
@@ -113,6 +137,63 @@ export function TaskHistory() {
     if (selected) void loadDetail(selected);
     return cancelDetail;
   }, [selected, loadDetail, cancelDetail]);
+  useEffect(() => {
+    let stopped = false,
+      busy = false,
+      position = 0;
+    const active = (run: Run) =>
+      run.actionRuns.some((action) => ["pending", "running", "retry"].includes(action.status));
+    async function refreshActive() {
+      const state = live.current;
+      if (
+        stopped ||
+        busy ||
+        document.visibilityState === "hidden" ||
+        state.loading ||
+        state.detailLoading
+      )
+        return;
+      const ids = state.runs.filter(active).map((run) => run.id);
+      const selectedId =
+        state.detail && state.selected === state.detail.id && active(state.detail)
+          ? state.detail.id
+          : null;
+      const start = ids.length ? position % ids.length : 0;
+      const batch = Array.from(
+        new Set([...(selectedId ? [selectedId] : []), ...ids.slice(start), ...ids.slice(0, start)]),
+      ).slice(0, 5);
+      if (!batch.length) return;
+      position += selectedId ? 4 : 5;
+      busy = true;
+      const listVersion = listRequest.current,
+        detailVersion = detailRequest.current;
+      const results = await Promise.allSettled(
+        batch.map((id) =>
+          axios.get(`${BACKEND_URL}/api/v1/runs/${encodeURIComponent(id)}`, apiOptions()),
+        ),
+      );
+      busy = false;
+      if (stopped || listVersion !== listRequest.current || detailVersion !== detailRequest.current)
+        return;
+      setLiveError(results.some((result) => result.status === "rejected"));
+      for (const result of results)
+        if (result.status === "fulfilled") {
+          const updated = result.value.data.run as Run;
+          mergeRun(updated);
+          setDetail((current) => (current?.id === updated.id ? updated : current));
+        }
+    }
+    const timer = window.setInterval(() => void refreshActive(), 3000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshActive();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [mergeRun]);
   function apply(event: React.FormEvent) {
     event.preventDefault();
     setValidation("");
@@ -203,6 +284,11 @@ export function TaskHistory() {
           </Button>
         </div>
       </form>
+      {liveError && (
+        <p role="status" className="mb-4 text-body-sm text-amber-800">
+          Live updates are temporarily unavailable. Showing the last known status.
+        </p>
+      )}
       {validation && (
         <p role="alert" className="mb-4 text-red-600">
           {validation}
@@ -301,7 +387,7 @@ export function TaskHistory() {
         </div>
       )}
       <p className="mt-4 text-caption text-neutral-500">
-        Times use your browser&apos;s time zone. Refresh to see the latest status.
+        Times use your browser&apos;s time zone. Active runs update automatically every few seconds.
       </p>
       <Modal
         isOpen={!!selected}
@@ -331,12 +417,16 @@ export function TaskHistory() {
                 Created: <Time value={detail.createdAt} />
               </p>
               <div className="flex items-center gap-3">
-                <Link
-                  href={`/zap/${detail.zapId}`}
-                  className="text-body-sm font-medium text-brand-600 hover:underline"
-                >
-                  Open workflow
-                </Link>
+                {detail.zap.deletedAt ? (
+                  <span className="text-body-sm text-neutral-500">Automation deleted</span>
+                ) : (
+                  <Link
+                    href={`/zap/${detail.zapId}`}
+                    className="text-body-sm font-medium text-brand-600 hover:underline"
+                  >
+                    Open workflow
+                  </Link>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"

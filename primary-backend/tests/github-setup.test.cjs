@@ -108,7 +108,7 @@ test.each(["get", "save"])("does not access another user's workflow for %s", asy
   expect(res.status).toHaveBeenCalledWith(404);
   expect(tx.credential.upsert).not.toHaveBeenCalled();
   expect(tx.zap.findFirst).toHaveBeenCalledWith({
-    where: { id: "workflow", userId: 2 },
+    where: { id: "workflow", userId: 2, deletedAt: null },
     select: { id: true, trigger: { select: { triggerId: true } } },
   });
 });

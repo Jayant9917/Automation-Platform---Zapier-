@@ -40,7 +40,7 @@ export function createGitHubSetupHandlers(db: Database, settings: Settings) {
       const workflowId = String(req.params.zapId);
       try {
         const workflow = await db.zap.findFirst({
-          where: { id: workflowId, userId },
+          where: { id: workflowId, userId, deletedAt: null },
           select: { id: true, trigger: { select: { triggerId: true } } },
         });
         if (!workflow) return res.status(404).json({ error: "Workflow not found" });
@@ -74,7 +74,7 @@ export function createGitHubSetupHandlers(db: Database, settings: Settings) {
       try {
         const outcome = await db.$transaction(async (tx) => {
           const workflow = await tx.zap.findFirst({
-            where: { id: workflowId, userId },
+            where: { id: workflowId, userId, deletedAt: null },
             select: { id: true, trigger: { select: { triggerId: true } } },
           });
           if (!workflow) return "missing";

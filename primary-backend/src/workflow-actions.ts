@@ -150,12 +150,12 @@ export function createWorkflowActionHandlers(
         await db.$transaction(async (tx) => {
           // Claim the expected workflow revision before touching actions. Concurrent saves must reload.
           const claim = await tx.zap.updateMany({
-            where: { id: zapId, userId, actionsRevision: parsed.data.revision },
+            where: { id: zapId, userId, deletedAt: null, actionsRevision: parsed.data.revision },
             data: { actionsRevision: { increment: 1 } },
           });
           if (!claim.count) {
             const owned = await tx.zap.findFirst({
-              where: { id: zapId, userId },
+              where: { id: zapId, userId, deletedAt: null },
               select: { id: true },
             });
             throw new InputError(

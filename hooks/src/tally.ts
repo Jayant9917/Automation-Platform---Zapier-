@@ -73,7 +73,7 @@ export function createTallyHandler(db: Database, encryptionKey?: string) {
     const workflowId = String(req.params.workflowId);
     try {
       const connection = await db.tallyTrigger.findUnique({
-        where: { workflowId },
+        where: { workflowId, workflow: { deletedAt: null } },
         include: {
           credential: true,
           workflow: {
@@ -149,7 +149,7 @@ export function createTallyHandler(db: Database, encryptionKey?: string) {
               workflowId,
               revision: connection.revision,
               enabled: true,
-              workflow: { trigger: { triggerId: triggerType } },
+              workflow: { deletedAt: null, trigger: { triggerId: triggerType } },
             },
             include: { workflow: { include: { actions: true } } },
           });

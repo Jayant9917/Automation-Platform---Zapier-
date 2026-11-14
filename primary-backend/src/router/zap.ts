@@ -1,3 +1,4 @@
+import { createDeleteWorkflowHandler } from "../delete-workflow.js";
 import { createTestEventHandler } from "../test-event.js";
 import { createTallySetupHandlers } from "../tally-setup.js";
 import { Router } from "express";
@@ -9,6 +10,7 @@ import { createGitHubSetupHandlers } from "../github-setup.js";
 import { createExecutionHistoryHandler } from "../execution-history.js";
 
 const router = Router();
+router.delete("/:zapId", authMiddleware, createDeleteWorkflowHandler(prismaClient));
 router.post(
   "/:zapId/test-event",
   authMiddleware,
@@ -43,6 +45,7 @@ router.get("/", authMiddleware, async (req, res) => {
   const zaps = await prismaClient.zap.findMany({
     where: {
       userId: userId,
+      deletedAt: null,
     },
     include: {
       actions: {
@@ -85,6 +88,7 @@ router.get("/:zapId", authMiddleware, async (req, res) => {
   const zap = await prismaClient.zap.findFirst({
     where: {
       id: zapId,
+      deletedAt: null,
       userId: parseInt(id, 10),
     },
     include: {

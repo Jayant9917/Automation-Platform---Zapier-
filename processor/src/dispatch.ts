@@ -13,7 +13,7 @@ export async function dispatchActions(db: Database, publish: Publish, now = new 
         where: { id: entry.zapRunId },
         include: { actionRuns: true, zap: { include: { actions: true } } },
       });
-      if (run.actionRuns.length === 0) {
+      if (!run.zap.deletedAt && run.actionRuns.length === 0) {
         for (const action of run.zap.actions) {
           await tx.actionRun.upsert({
             where: { zapRunId_actionId: { zapRunId: run.id, actionId: action.id } },
@@ -47,8 +47,19 @@ export async function dispatchActions(db: Database, publish: Publish, now = new 
     where: { status: "running", leaseUntil: { lte: now } },
     data: { status: "needs_attention", errorCode: "WORKER_LEASE_EXPIRED", leaseUntil: null },
   });
+  // Also catch an in-flight webhook/backfill that committed just after deletion.
+  await db.actionRun.updateMany({
+    where: { status: { in: ["pending", "retry"] }, zapRun: { zap: { deletedAt: { not: null } } } },
+    data: {
+      status: "cancelled",
+      errorCode: "WORKFLOW_DELETED",
+      claimToken: null,
+      leaseUntil: null,
+    },
+  });
   const due = await db.actionRun.findMany({
     where: {
+      zapRun: { zap: { deletedAt: null } },
       status: { in: ["pending", "retry"] },
       nextAttemptAt: { lte: now },
       dispatchAfter: { lte: now },

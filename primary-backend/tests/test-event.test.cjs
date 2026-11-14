@@ -46,7 +46,7 @@ test.each([
 test("owner check restricts test events to generic webhook workflows", async () => {
   await handle();
   expect(db.zap.findFirst).toHaveBeenCalledWith({
-    where: { id: "workflow", userId: 2, trigger: { triggerId: "webhook" } },
+    where: { id: "workflow", userId: 2, deletedAt: null, trigger: { triggerId: "webhook" } },
     select: { id: true, actions: { select: { id: true } } },
   });
   const [url, options] = fetcher.mock.calls[0];

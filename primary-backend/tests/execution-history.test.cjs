@@ -17,7 +17,7 @@ beforeEach(() => {
 test("scopes history to the owner and returns independent statuses", async () => {
   await createExecutionHistoryHandler(db)(req, res);
   expect(db.zap.findFirst).toHaveBeenCalledWith({
-    where: { id: "zap", userId: 2 },
+    where: { id: "zap", userId: 2, deletedAt: null },
     select: { id: true },
   });
   expect(res.json).toHaveBeenCalledWith({

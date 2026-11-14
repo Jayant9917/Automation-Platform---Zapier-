@@ -34,7 +34,7 @@ test("history is bounded, owner-scoped and selects only safe metadata", async ()
   expect(query.select.metadata).toBeUndefined();
   expect(query.select.actionRuns.select.config).toBeUndefined();
   expect(query.select.actionRuns.select.credentialId).toBeUndefined();
-  expect(db.zap.findMany.mock.calls[0][0].where).toEqual({ userId: 2 });
+  expect(db.zap.findMany.mock.calls[0][0].where).toEqual({ userId: 2, deletedAt: null });
   expect(res.json.mock.calls[0][0]).toMatchObject({
     runs: [{ status: "partially_failed" }],
     nextCursor: null,
@@ -154,10 +154,14 @@ test.each(
     ["succeeded", "failed"],
     ["failed"],
     ["failed", "failed"],
+    ["cancelled"],
+    ["cancelled", "succeeded"],
+    ["cancelled", "failed"],
   ].map((states) => [states]),
 )("status filter agrees with business status for %s", (states) => {
   const expected = getExecutionStatus(states);
   for (const status of [
+    "cancelled",
     "pending",
     "running",
     "succeeded",

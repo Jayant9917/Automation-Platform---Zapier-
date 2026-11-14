@@ -90,7 +90,7 @@ test.each([null, { actions: [] }])(
 test("checks workflow against the user in the webhook URL", async () => {
   await createWebhookHandler(database)(req, res);
   expect(tx.zap.findFirst).toHaveBeenCalledWith({
-    where: { id: "unit-zap", userId: 2 },
+    where: { id: "unit-zap", userId: 2, deletedAt: null },
     include: { actions: true, githubTrigger: true, trigger: true },
   });
 });

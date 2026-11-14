@@ -15,10 +15,11 @@ export type Run = {
   createdAt: string;
   status: string;
   actionRuns: RunAction[];
-  zap: { trigger: { type: { name: string } } | null };
+  zap: { deletedAt?: string | null; trigger: { type: { name: string } } | null };
 };
 export type WorkflowOption = { id: string; trigger: { type: { name: string } } | null };
 export const statusLabels: Record<string, string> = {
+  cancelled: "Cancelled",
   pending: "Pending",
   running: "In progress",
   retry: "Retry scheduled",
@@ -30,6 +31,7 @@ export const statusLabels: Record<string, string> = {
 export function errorExplanation(code: string | null): string {
   if (!code) return "";
   const messages: Record<string, string> = {
+    WORKFLOW_DELETED: "This queued action was cancelled because its automation was deleted.",
     CONNECTION_REQUIRED:
       "Choose a connection for this action and check the application encryption settings.",
     CONNECTION_NOT_AVAILABLE:

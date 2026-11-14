@@ -24,6 +24,7 @@ export async function executeAction(
     where: {
       id: job.actionExecutionId,
       zapRunId: job.executionId,
+      zapRun: { zap: { deletedAt: null } },
       status: { in: ["pending", "retry"] },
       nextAttemptAt: { lte: now },
       attempts: { lt: MAX_ATTEMPTS },

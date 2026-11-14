@@ -74,7 +74,7 @@ test("publishes one reference job for each due action", async () => {
 });
 test("another processor's lease prevents duplicate publication", async () => {
   db.actionRun.findMany.mockResolvedValue([{ id: "a", zapRunId: "run" }]);
-  db.actionRun.updateMany.mockResolvedValueOnce({ count: 0 }).mockResolvedValueOnce({ count: 0 });
+  db.actionRun.updateMany.mockResolvedValue({ count: 0 });
   await dispatchActions(db, publish, now);
   expect(publish).not.toHaveBeenCalled();
 });
@@ -86,9 +86,10 @@ test("partial publication failure retains durable work and continues siblings", 
   publish.mockRejectedValueOnce(new Error("Kafka unavailable"));
   await dispatchActions(db, publish, now);
   expect(publish).toHaveBeenCalledTimes(2);
-  expect(db.actionRun.updateMany.mock.calls[1][0].data.dispatchAfter).toEqual(
-    new Date(now.getTime() + 30000),
-  );
+  expect(
+    db.actionRun.updateMany.mock.calls.find(([args]) => args.data.dispatchAfter)[0].data
+      .dispatchAfter,
+  ).toEqual(new Date(now.getTime() + 30000));
 });
 
 test("backfills malformed legacy config for explicit handler failure", async () => {
@@ -96,4 +97,27 @@ test("backfills malformed legacy config for explicit handler failure", async () 
   (await tx.zapRun.findUniqueOrThrow()).zap.actions[0].Metadata = null;
   await dispatchActions(db, publish, now);
   expect(tx.actionRun.upsert.mock.calls[0][0].create.config).toEqual({});
+});
+
+test("deleted legacy workflows do not backfill new actions", async () => {
+  db.zapRunOutbox.findMany.mockResolvedValue([{ id: "old", zapRunId: "run" }]);
+  const run = await tx.zapRun.findUniqueOrThrow();
+  run.zap.deletedAt = now;
+  await dispatchActions(db, publish, now);
+  expect(tx.actionRun.upsert).not.toHaveBeenCalled();
+  expect(tx.zapRunOutbox.deleteMany).toHaveBeenCalled();
+  expect(db.actionRun.findMany.mock.calls[0][0].where.zapRun).toEqual({ zap: { deletedAt: null } });
+});
+
+test("cancels any queued run committed after workflow deletion", async () => {
+  await dispatchActions(db, publish, now);
+  expect(db.actionRun.updateMany).toHaveBeenCalledWith({
+    where: { status: { in: ["pending", "retry"] }, zapRun: { zap: { deletedAt: { not: null } } } },
+    data: {
+      status: "cancelled",
+      errorCode: "WORKFLOW_DELETED",
+      claimToken: null,
+      leaseUntil: null,
+    },
+  });
 });

@@ -27,6 +27,7 @@ export function createTallySetupHandlers(
           where: {
             id: workflowId,
             userId: ownerId,
+            deletedAt: null,
             trigger: { triggerId: "tally.form_submitted" },
           },
           select: { id: true },
@@ -65,6 +66,7 @@ export function createTallySetupHandlers(
             where: {
               id: workflowId,
               userId: ownerId,
+              deletedAt: null,
               trigger: { triggerId: "tally.form_submitted" },
             },
             select: { id: true },

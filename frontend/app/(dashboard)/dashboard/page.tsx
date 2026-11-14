@@ -9,6 +9,8 @@ import { BACKEND_URL, HOOKS_URL } from "@/app/config";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { TableSkeleton } from "@/components/ui/Skeleton";
+import { Modal } from "@/components/ui/Modal";
+import { apiOptions, apiMessage } from "@/lib/actions";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 interface Zap {
@@ -52,11 +54,28 @@ function useZaps() {
       });
   }, []);
 
-  return { loading, zaps };
+  return { loading, zaps, setZaps };
 }
 
 export default function DashboardPage() {
-  const { loading, zaps } = useZaps();
+  const { loading, zaps, setZaps } = useZaps();
+  const [deleting, setDeleting] = useState<Zap | null>(null);
+  const [busy, setBusy] = useState(false),
+    [deleteError, setDeleteError] = useState("");
+  async function remove() {
+    if (!deleting) return;
+    setBusy(true);
+    setDeleteError("");
+    try {
+      await axios.delete(`${BACKEND_URL}/api/v1/zap/${deleting.id}`, apiOptions());
+      setZaps((current) => current.filter((zap) => zap.id !== deleting.id));
+      setDeleting(null);
+    } catch (error) {
+      setDeleteError(apiMessage(error, "Could not delete automation."));
+    } finally {
+      setBusy(false);
+    }
+  }
   const router = useRouter();
 
   return (
@@ -136,13 +155,24 @@ export default function DashboardPage() {
                     <td className="px-6 py-4 text-body text-neutral-700 font-mono text-body-sm">
                       {z.id.slice(0, 8)}…
                     </td>
-                    <td className="px-6 py-4 text-body-sm text-neutral-500">Nov 13, 2023</td>
+                    <td className="px-6 py-4 text-body-sm text-neutral-500">Not recorded</td>
                     <td className="px-6 py-4 text-body-sm text-neutral-500 font-mono max-w-[200px] truncate">
                       {`${HOOKS_URL || (typeof window !== "undefined" ? window.location.origin : "")}${z.trigger.type.id === "tally.form_submitted" ? `/hooks/tally/${z.id}` : z.trigger.type.id.startsWith("github.") ? `/hooks/github/${z.id}` : `/hooks/catch/${z.userId}/${z.id}`}`}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Button variant="ghost" size="sm" onClick={() => router.push("/zap/" + z.id)}>
                         Open
+                      </Button>
+                      <Button
+                        variant="ghostDanger"
+                        size="sm"
+                        aria-label={`Delete automation ${z.id}`}
+                        onClick={() => {
+                          setDeleting(z);
+                          setDeleteError("");
+                        }}
+                      >
+                        Delete
                       </Button>
                     </td>
                   </tr>
@@ -152,6 +182,35 @@ export default function DashboardPage() {
           </div>
         </Card>
       )}
+      <Modal
+        isOpen={!!deleting}
+        onClose={() => {
+          if (!busy) setDeleting(null);
+        }}
+        title="Delete automation?"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-body-sm text-neutral-600">
+            This removes the automation and stops new events. Queued actions are cancelled;
+            already-started actions may finish. Execution history and saved connections are kept.
+          </p>
+          <p className="break-all text-caption text-neutral-500">{deleting?.id}</p>
+          {deleteError && (
+            <p role="alert" className="text-red-600">
+              {deleteError}
+            </p>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" disabled={busy} onClick={() => setDeleting(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" disabled={busy} onClick={() => void remove()}>
+              {busy ? "Deleting..." : "Delete automation"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

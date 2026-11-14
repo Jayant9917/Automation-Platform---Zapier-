@@ -20,7 +20,12 @@ export function createTestEventHandler(
         .json({ message: "Use a JSON object smaller than 64 KB for the sample event" });
     try {
       const workflow = await db.zap.findFirst({
-        where: { id: String(req.params.zapId), userId, trigger: { triggerId: "webhook" } },
+        where: {
+          id: String(req.params.zapId),
+          userId,
+          deletedAt: null,
+          trigger: { triggerId: "webhook" },
+        },
         select: { id: true, actions: { select: { id: true } } },
       });
       if (!workflow) return res.status(404).json({ message: "Generic webhook workflow not found" });

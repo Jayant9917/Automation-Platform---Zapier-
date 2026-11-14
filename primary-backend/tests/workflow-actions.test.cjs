@@ -74,7 +74,7 @@ test("preserves existing action IDs, removes omitted actions and adds new ones",
   req.body.actions = [{ ...email, id }, email];
   await handlers().update(req, res);
   expect(tx.zap.updateMany).toHaveBeenCalledWith({
-    where: { id: "workflow", userId: 2, actionsRevision: 0 },
+    where: { id: "workflow", userId: 2, deletedAt: null, actionsRevision: 0 },
     data: { actionsRevision: { increment: 1 } },
   });
   expect(tx.action.deleteMany).toHaveBeenCalledWith({

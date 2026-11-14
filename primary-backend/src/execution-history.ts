@@ -8,7 +8,10 @@ export function createExecutionHistoryHandler(db: Pick<PrismaClient, "zap" | "za
     const zapId = String(req.params.zapId);
     if (!Number.isInteger(userId) || userId < 1)
       return res.status(403).json({ message: "Unauthorized" });
-    const workflow = await db.zap.findFirst({ where: { id: zapId, userId }, select: { id: true } });
+    const workflow = await db.zap.findFirst({
+      where: { id: zapId, userId, deletedAt: null },
+      select: { id: true },
+    });
     if (!workflow) return res.status(404).json({ message: "Workflow not found" });
     // Only return safe status fields, never event contents or snapshotted configuration.
     const runs = await db.zapRun.findMany({

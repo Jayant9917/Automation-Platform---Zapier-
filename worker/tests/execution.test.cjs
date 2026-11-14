@@ -183,3 +183,12 @@ test.each([null, [], "payload"])(
     });
   },
 );
+
+test("deleted workflows cannot claim an action", async () => {
+  db.actionRun.updateMany.mockResolvedValue({ count: 0 });
+  await execute();
+  expect(db.actionRun.updateMany.mock.calls[0][0].where.zapRun).toEqual({
+    zap: { deletedAt: null },
+  });
+  expect(handler.execute).not.toHaveBeenCalled();
+});
