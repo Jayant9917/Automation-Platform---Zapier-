@@ -389,8 +389,8 @@ export function WorkflowCanvas({
                 )}
                 {type === "email" && (
                   <p className="rounded-xl bg-brand-50/60 p-3 text-body-sm text-neutral-600">
-                    Email uses your current development inbox. Choose the recipient and message in
-                    Configure.
+                    Email uses the configured sender and email provider. Choose the recipient and
+                    message in Configure.
                   </p>
                 )}
                 <div className="flex justify-end border-t border-neutral-100 pt-4">

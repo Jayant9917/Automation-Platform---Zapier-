@@ -285,13 +285,7 @@ services:
         - action: rebuild
           path: ./processor/prisma
 
-  # Development inbox: view captured emails at http://localhost:8025.
-  mailpit:
-    image: axllent/mailpit:v1.27
-    ports:
-      - "127.0.0.1:${MAIL_PORT:-8025}:8025"
-
-  # Consumes Kafka messages and sends emails to the development inbox.
+  # Consumes Kafka messages and sends email through Resend SMTP.
   worker:
     restart: unless-stopped
     image: actionhub-worker-dev
@@ -305,18 +299,18 @@ services:
       KAFKA_BROKERS: kafka:9092
       KAFKA_TOPIC: zap-events
       KAFKA_GROUP_ID: main-worker
-      SMTP_ENDPOINT: mailpit
-      SMTP_PORT: 1025
-      SMTP_AUTH: "false"
-      SMTP_REQUIRE_TLS: "false"
-      SMTP_FROM: workflows@actionhub.test
+      SMTP_ENDPOINT: ${SMTP_ENDPOINT:-smtp.resend.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_AUTH: "true"
+      SMTP_REQUIRE_TLS: "true"
+      SMTP_USERNAME: ${SMTP_USERNAME:-resend}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:?Set SMTP_PASSWORD in .env.docker}
+      SMTP_FROM: ${SMTP_FROM:?Set SMTP_FROM in .env.docker}
     depends_on:
       db-init:
         condition: service_completed_successfully
       kafka-init:
         condition: service_completed_successfully
-      mailpit:
-        condition: service_started
     develop:
       watch:
         - action: sync+restart

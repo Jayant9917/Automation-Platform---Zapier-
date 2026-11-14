@@ -56,7 +56,7 @@ export const config = {
   smtp: {
     host: required("SMTP_ENDPOINT").trim(),
     port: smtpPort,
-    secure: smtpPort === 465,
+    secure: smtpPort === 465 || smtpPort === 2465,
     auth: smtpAuth,
     requireTLS: boolean("SMTP_REQUIRE_TLS", true),
     user: smtpAuth ? required("SMTP_USERNAME") : "",

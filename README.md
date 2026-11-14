@@ -16,7 +16,7 @@ Run the application and infrastructure in Docker Desktop. See [the Docker develo
 docker compose --env-file .env.docker up --build --watch
 ```
 
-Open http://localhost:8080 and the test email inbox at http://localhost:8025. Normal source changes sync automatically; only the affected service restarts or rebuilds. Subsequent starts can omit `--build`. The private `.env.docker` is injected by Compose; per-service `.env` files are not needed inside these containers.
+Open http://localhost:8080. Email actions send real mail through Resend SMTP using the private settings in `.env.docker`. Normal source changes sync automatically; only the affected service restarts or rebuilds. Subsequent starts can omit `--build`. The private `.env.docker` is injected by Compose; per-service `.env` files are not needed inside these containers.
 
 The older host installation instructions below are historical and are not the Docker development workflow.
 

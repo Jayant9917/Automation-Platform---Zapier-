@@ -96,3 +96,8 @@ test("requires database access for action tracking", () => {
   delete process.env.DATABASE_URL;
   expect(load).toThrow("DATABASE_URL");
 });
+
+test("Resend alternative implicit TLS port uses a secure transport", () => {
+  process.env.SMTP_PORT = "2465";
+  expect(load().config.smtp.secure).toBe(true);
+});
