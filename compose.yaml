@@ -230,6 +230,7 @@ services:
 
   # Reads pending database events and publishes messages to Kafka.
   processor:
+    restart: unless-stopped
     image: actionhub-processor-dev
     build:
       context: ./processor
@@ -292,6 +293,7 @@ services:
 
   # Consumes Kafka messages and sends emails to the development inbox.
   worker:
+    restart: unless-stopped
     image: actionhub-worker-dev
     build:
       context: ./worker
